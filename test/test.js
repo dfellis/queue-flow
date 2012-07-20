@@ -5,24 +5,24 @@ exports.toArray = function(test) {
 	q([1, 2, 3]).toArray(function(result) {
 		test.equal([1, 2, 3].toString(), result.toString(), 'array passes through the queue');
 		test.done();
-	}).closeOnEmpty();
+	});
 };
 
 exports.as = function(test) {
 	test.expect(1);
 	q([1, 2, 3]).as('test1');
-	q('test1').toArray(function(result) {
+	q('test1').closeOnEmpty().toArray(function(result) {
 		test.equal([1, 2, 3].toString(), result.toString(), 'named queue properly referenceable');
 		test.done();
-	}).closeOnEmpty();
+	});
 };
 
 exports.push = function(test) {
 	test.expect(1);
-	q('test2').push(1, 2, 3).toArray(function(result) {
+	q('test2').push(1, 2, 3).closeOnEmpty().toArray(function(result) {
 		test.equal([1, 2, 3].toString(), result.toString(), 'named queue with elements pushed after-the-fact properly referenceable');
 		test.done();
-	}).closeOnEmpty();
+	});
 };
 
 exports.map = function(test) {
@@ -32,7 +32,7 @@ exports.map = function(test) {
 	}).toArray(function(result) {
 		test.equal([2, 4, 6].toString(), result.toString(), 'queue mapped properly');
 		test.done();
-	}).closeOnEmpty();
+	});
 };
 
 exports.reduce = function(test) {
@@ -42,7 +42,7 @@ exports.reduce = function(test) {
 	}, function(result) {
 		test.equal(6, result, 'queue reduced properly');
 		test.done();
-	}, 0).closeOnEmpty();
+	}, 0);
 };
 
 exports.filter = function(test) {
@@ -52,7 +52,7 @@ exports.filter = function(test) {
 	}).toArray(function(result) {
 		test.equal([1, 2, 99, 100].toString(), result.toString(), 'queue properly filtered');
 		test.done();
-	}).closeOnEmpty();
+	});
 };
 
 exports.on = function(test) {
@@ -68,10 +68,8 @@ exports.on = function(test) {
 		.on('empty', function() {
 			test.ok(true, 'empty event fired');
 		})
-		.closeOnEmpty()
 		.toArray(function() { });
 	q([1, 2, 3])
-		.closeOnEmpty()
 		.on('close', function() {
 			return false;
 		})
@@ -94,15 +92,35 @@ exports.branch = function(test) {
 		test.equal([99, 100].toString(), result.toString(), 'big queue properly populated');
 		num++;
 		if(num == 3) test.done();
-	}).closeOnEmpty();
+	});
 	q('small').toArray(function(result) {
 		test.equal([1, 2].toString(), result.toString(), 'small queue properly populated');
 		num++;
 		if(num == 3) test.done();
-	}).closeOnEmpty();
+	});
 	q('invalid').toArray(function(result) {
 		test.equal(['skip a few'].toString(), result.toString(), 'invalid queue properly populated');
 		num++;
 		if(num == 3) test.done();
-	}).closeOnEmpty();
+	});
+};
+
+exports.latency = function(test) {
+	test.expect(1);
+	var currentMapVal = Infinity;
+	var reducedLatency = false;
+	q([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+		.map(function(val) {
+			currentMapVal = val;
+			return val;
+		})
+		.reduce(function(prev, val) {
+			if(currentMapVal < 10) {
+				reducedLatency = true;
+			}
+			return val;
+		}, function(result) {
+			test.ok(reducedLatency, 'reduce started processing before map completed');
+			test.done();
+		});
 };

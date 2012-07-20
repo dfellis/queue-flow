@@ -311,8 +311,89 @@ There are two function signatures for the map callback:
 ```js
 {
 	sync: function(val) { return something; },
-	async: q.async(function(val, callback) { callback(something); }
+	async: q.async(function(val, callback) { callback(something); })
 }
+```
+
+### ``Q.prototype.reduce`` Method
+
+```js
+q([1, 2, 3]).reduce(reduceCallback, finalCallback, initialCondition); // returns the original Q instance
+```
+
+This method performs a reduce operation. Values from the queue are pulled, manipulated by the first callback which has been given the previous value (or initialCondition), and when the queue closes, the results are passed to the final callback.
+
+There are two function signatures for the first reduce callback:
+
+```js
+{
+	sync: function(prev, val) { return something; },
+	async: q.async(function(prev, val, callback) { callback(something); })
+}
+```
+
+The second callback has just one signature:
+```js
+function(result) { /* Do whatever */ }
+```
+
+### ``Q.prototype.filter`` Method
+
+```js
+q([1, 2, 3]).filter(filterCallback); // returns a new Q instance
+```
+
+This method performs a filter operation. Values from the queue are pulled and passed to the filter callback. If the callback returns true, the value is passed on to the new anonymous queue, otherwise it is discarded.
+
+There are two function signatures for the filter callback:
+
+```js
+{
+	sync: function(val) { return true || false; },
+	async: q.async(function(val, callback) { callback(true || false); })
+}
+```
+
+### ``Q.prototype.branch`` Method
+
+```js
+q([1, 2, 3]).branch(branchCallback); // returns the original Q instance
+```
+
+This method performs the queueFlow-specific branch operation. Values from the queue are pulled and passed to the filter callback. The callback then returns the name of the queue the value should be inserted into.
+
+There are two function signatures for the branch callback:
+
+```js
+{
+	sync: function(val) { return 'queueName'; },
+	async: q.async(function(val, callback) { callback('queueName'); })
+}
+```
+
+### ``Q.prototype.every`` and ``Q.prototype.some`` Methods
+
+These methods have the following signatures:
+
+```js
+q([1, 2, 3]).every(everyCallback, finalCallback); // returns original Q instance
+q([1, 2, 3]).some(someCallback, finalCallback); // returns original Q instance
+```
+
+For both, the first callback, just like the first callback of the ``filter`` method, and must return a true or false. However, they are like ``reduce`` in that they return a singular value at the end. For ``every``, it passes ``true`` to the final callback *only if every* call to the first callback returns true, otherwise it short-circuits and returns false. For ``some`` is the opposite, it passes ``true`` to the final callback if it receives a single ``true`` from the first callback, otherwise it returns ``false`` after the entire array is parsed.
+
+The first callback of both have the exact same signatures as the ``filter`` method's first callback.
+
+### ``Q.prototype.toArray`` Method
+
+```js
+q([1, 2, 3]).toArray(callback); // returns original Q instance
+```
+
+This method drains the attached queue and constructs a "normal" array, which is then passed to the specified callback, which is the only argument. This callback has the following signature:
+
+```js
+function(array) { /* Do whatever */ }
 ```
 
 ## Planned Features

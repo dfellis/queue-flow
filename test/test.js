@@ -124,3 +124,13 @@ exports.latency = function(test) {
 			test.done();
 		});
 };
+
+exports.async = function(test) {
+	test.expect(1);
+	q([1, 2, 3]).map(q.async(function(val, callback) {
+		callback(val*2);
+	})).toArray(function(result) {
+		test.equal([2, 4, 6].toString(), result.toString(), 'asynchronous methods also complete as expected');
+		test.done();
+	});
+};

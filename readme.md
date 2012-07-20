@@ -1,12 +1,12 @@
-# queueFlow
+# queue-flow
 
 ## Quick install instructions
 
 For Node.js
 
-    npm install queueFlow
+    npm install queue-flow
 
-For browsers, just copy ``./lib/queueFlow.js`` and include it in a ``<script>`` tag.
+For browsers, just copy ``./lib/queue-flow.js`` and include it in a ``<script>`` tag.
 
 ## Latency-reducing, async-capable functional programming using named (or not) queues
 
@@ -58,10 +58,10 @@ But there are two significant issues:
 
 These deficiencies mean the clean, easy-to-read-and-refactor functional style aren't practical in Javascript. The [async library](https://github.com/caolan/async) makes significant headway on this problem, but still feels more awkward.
 
-## Enter *queueFlow*
+## Enter *queue-flow*
 
 ```js
-var q = require('queueFlow');
+var q = require('queue-flow');
 
 q([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 	.map(function(val) {
@@ -102,7 +102,7 @@ reduce 10
 10
 ``
 
-**queueFlow** builds a series of input and output queues for work to traverse from functional concept to functional concept, with reduce-style functions (that compress all values into a single result) instead having a final callback fired when the queue processing is completed.
+**queue-flow** builds a series of input and output queues for work to traverse from functional concept to functional concept, with reduce-style functions (that compress all values into a single result) instead having a final callback fired when the queue processing is completed.
 
 Marking a callback as an asynchronous one (needed a callback passed to it, as well) so it can be used with jQuery ``$.ajax()`` calls or Node.js libraries, is also quite simple:
 
@@ -185,7 +185,7 @@ q([1, 2, 3])
 	.toArray(console.log); // Never fires
 ```
 
-When requesting a queue, an optional second parameter may be provided to use a third-party constructor, which will be useful for things like queueFlows designed for Web Workers or Node Clusters, but none exist, yet. Developers of such a library should use the tests in the ``./test`` directory to verify proper behavior of their plugin.
+When requesting a queue, an optional second parameter may be provided to use a third-party constructor, which will be useful for things like queue-flows designed for Web Workers or Node Clusters, but none exist, yet. Developers of such a library should use the tests in the ``./test`` directory to verify proper behavior of their plugin.
 
 ```js
 q([1, 2, 3], WebWorkerQueue); // Someday...
@@ -193,7 +193,7 @@ q([1, 2, 3], WebWorkerQueue); // Someday...
 
 ## API Reference
 
-queueFlow consists of a helper function and its methods for initially constructing a queueFlow object, and the default queueFlow consructor and its methods (privileged and prototypal).
+queue-flow consists of a helper function and its methods for initially constructing a queue-flow object, and the default queue-flow consructor and its methods (privileged and prototypal).
 
 ### ``q`` Accessor/Constructor Helper
 
@@ -211,7 +211,7 @@ When an array, the array is used to populate the unnamed queue immediately, and 
 
 When undefined, and unnamed queue is created with no values. This is the only unnamed queue that will not automatically close itself when empty.
 
-``qType`` is either a constructor function or left undefined. queueFlow does nothing to verify that the provided constructor function is valid, except checking that it is a ``Function`` object, so use this mechanism with care!
+``qType`` is either a constructor function or left undefined. queue-flow does nothing to verify that the provided constructor function is valid, except checking that it is a ``Function`` object, so use this mechanism with care!
 
 ### ``q.async`` (or ``q.cps``) Helper Method
 
@@ -233,7 +233,7 @@ This constructor is not publicly available, yet.
 q('someQueue').on(event, callbackFunction); // returns Q instance
 ```
 
-There are 4 events in queueFlow: ``push``, ``pull``, ``close``, and ``empty``. All events except ``empty`` may be cancelled by returning ``false``. The method signatures of the callbacks for each event are as follows:
+There are 4 events in queue-flow: ``push``, ``pull``, ``close``, and ``empty``. All events except ``empty`` may be cancelled by returning ``false``. The method signatures of the callbacks for each event are as follows:
 
 ```js
 {
@@ -360,7 +360,7 @@ There are two function signatures for the filter callback:
 q([1, 2, 3]).branch(branchCallback); // returns the original Q instance
 ```
 
-This method performs the queueFlow-specific branch operation. Values from the queue are pulled and passed to the filter callback. The callback then returns the name of the queue the value should be inserted into.
+This method performs the queue-flow-specific branch operation. Values from the queue are pulled and passed to the filter callback. The callback then returns the name of the queue the value should be inserted into.
 
 There are two function signatures for the branch callback:
 
@@ -398,7 +398,7 @@ function(array) { /* Do whatever */ }
 
 ## Planned Features
 
-* Create queueFlow scopes so the same flow names can be used by different functions.
+* Create queue-flow scopes so the same flow names can be used by different functions.
 * Expose the built-in ``Q`` object to make extending its prototype possible.
 * Async-capable ``.each`` method.
 

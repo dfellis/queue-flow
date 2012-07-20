@@ -193,7 +193,133 @@ q([1, 2, 3], WebWorkerQueue); // Someday...
 
 ## API Reference
 
-API Reference goes here!
+queueFlow consists of a helper function and its methods for initially constructing a queueFlow object, and the default queueFlow consructor and its methods (privileged and prototypal).
+
+### ``q`` Accessor/Constructor Helper
+
+This is the only thing publicly exposed by the library.
+
+```js
+q([nameOrArray], [qType]) // returns: new Q([nameOrArray], [qType])
+```
+
+``nameOrArray`` is either a string or an Array object, or can be left undefined.
+
+When a string, the string is used as the queue's name, which is either found in the set of named queues or is constructed on the spot and added to the set.
+
+When an array, the array is used to populate the unnamed queue immediately, and the queue is set to automatically close itself when empty.
+
+When undefined, and unnamed queue is created with no values. This is the only unnamed queue that will not automatically close itself when empty.
+
+``qType`` is either a constructor function or left undefined. queueFlow does nothing to verify that the provided constructor function is valid, except checking that it is a ``Function`` object, so use this mechanism with care!
+
+### ``q.async`` (or ``q.cps``) Helper Method
+
+This method flags a given function as one that should receive an asynchronous method list (with a callback) and the API will then expect the results be returned via the callback rather than immediately.
+
+```js
+q.async(func) // returns: modified func
+```
+
+Any ``Function`` object will succeed on this method, but it is up to the developer to make sure his arguments list matches the one specified for the queue processor his function is being given to.
+
+### ``Q`` Constructor
+
+This constructor is not publicly available, yet.
+
+### ``new Q().on`` Privileged Method
+
+```js
+q('someQueue').on(event, callbackFunction); // returns Q instance
+```
+
+There are 4 events in queueFlow: ``push``, ``pull``, ``close``, and ``empty``. All events except ``empty`` may be cancelled by returning ``false``. The method signatures of the callbacks for each event are as follows:
+
+```js
+{
+	push: function(value) {},
+	pull: function(value) {},
+	close: function() {},
+	empty: function() {}
+}
+```
+
+The callbacks' ``this`` is bound to the ``Q`` instance they are called on, more than one callback may be registered for a given event, they will be run in the order they are registered, and execution of event handlers will cease the moment any callback returns false (even for ``empty``, but it won't cancel the event in any other way).
+
+### ``new Q().fire`` Privileged Method
+
+```js
+q('someQueue').fire(event, some, other, variables); // Returns true or false
+```
+
+This is the mechanism by which events are fired, and meant primarily as a private method. It is exposed to allow the user to false-fire an event if they choose to do so (not recommeded), or for new prototypal methods to fire a new event invented for themselves (more understandable).
+
+The first argument is a string to identify the event, and the remaining arguments are made the new arguments to each registered event handler.
+
+### ``new Q().clear`` Privileged Method
+
+```js
+q('someQueue').clear('empty'); // returns Q instance
+```
+
+This method clears out all event handlers for a given event.
+
+### ``new Q().each`` (alias ``.setHandler``) Privileged Method
+
+```js
+q('someQueue').each(eachCallback); // returns Q instance
+```
+
+This method drains the queue and calls the given callback for each value. It is a very low-level queue processing function that is used internally by nearly all of the prototypal methods.
+
+The ``eachCallback`` signature is simply ``function(value, callback) { }`` where the ``callback`` takes no arguments.
+
+### ``new Q().push`` Privileged Method
+
+This method pushes new values onto the queue. Each argument is a separate queue value.
+
+### ``new Q().close`` Privileged Method
+
+This method destroys the queue. If there is a registered mechanism for draining the queue, it waits until all remaining items in the queue have been drained, otherwise it destroys on the next run through the Javascript event loop.
+
+### ``Q.prototype.as`` Method
+
+```js
+q([1, 2, 3]).as(name); // returns Q instance
+```
+
+This method take a string and registers the specific queue under that name. Queues may have more than one name.
+
+### ``Q.prototype.closeOnEmpty`` Method
+
+```js
+q('name').closeOnEmpty(); // returns Q instance
+```
+
+This method registers an event handler for the ``empty`` event to close the queue. Mostly used internally but may have a few other use-cases.
+
+### ``Q.prototype.map`` Method
+
+```js
+q([1,2,3]).map(mapCallback); // returns a new Q instance
+```
+
+This method performs a map operation. Values from the first queue are pulled, manipulated by the given callback, and then pushed into a new, anonymous queue which is returned as a reference for the next method in the chain. If the upstream queue is closed, map will propagate that change to the queue it's been given.
+
+There are two function signatures for the map callback:
+
+```js
+{
+	sync: function(val) { return something; },
+	async: q.async(function(val, callback) { callback(something); }
+}
+```
+
+## Planned Features
+
+* Create queueFlow scopes so the same flow names can be used by different functions.
+* Expose the built-in ``Q`` object to make extending its prototype possible.
+* Async-capable ``.each`` method.
 
 ## License (MIT)
 

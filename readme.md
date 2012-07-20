@@ -27,49 +27,27 @@ console.log([1,2,3,4,5,6,7,8,9,10]
 
 Prints:
 
-``
-map 1
-
-map 2
-
-map 3
-
-map 4
-
-map 5
-
-map 6
-
-map 7
-
-map 8
-
-map 9
-
-map 10
-
-reduce 1
-
-reduce 2
-
-reduce 3
-
-reduce 4
-
-reduce 5
-
-reduce 6
-
-reduce 7
-
-reduce 8
-
-reduce 9
-
-reduce 10
-
-10
-``
+    map 1
+    map 2
+    map 3
+    map 4
+    map 5
+    map 6
+    map 7
+    map 8
+    map 9
+    map 10
+    reduce 1
+    reduce 2
+    reduce 3
+    reduce 4
+    reduce 5
+    reduce 6
+    reduce 7
+    reduce 8
+    reduce 9
+    reduce 10
+    10
 
 But there are two significant issues:
 
@@ -98,49 +76,27 @@ q([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
 Prints:
 
-``
-map 1
-
-map 2
-
-map 3
-
-map 4
-
-reduce 1
-
-map 5
-
-reduce 2
-
-map 6
-
-reduce 3
-
-reduce 4
-
-map 7
-
-reduce 5
-
-map 8
-
-reduce 6
-
-map 9
-
-reduce 7
-
-map 10
-
-reduce 8
-
-reduce 9
-
-reduce 10
-
-10
-``
+    map 1
+    map 2
+    map 3
+    map 4
+    reduce 1
+    map 5
+    reduce 2
+    map 6
+    reduce 3
+    reduce 4
+    map 7
+    reduce 5
+    map 8
+    reduce 6
+    map 9
+    reduce 7
+    map 10
+    reduce 8
+    reduce 9
+    reduce 10
+    10
 
 **queue-flow** builds a series of input and output queues for work to traverse from functional concept to functional concept, with reduce-style functions (that compress all values into a single result) instead having a final callback fired when the queue processing is completed.
 

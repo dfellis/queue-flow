@@ -29,25 +29,45 @@ Prints:
 
 ``
 map 1
+
 map 2
+
 map 3
+
 map 4
+
 map 5
+
 map 6
+
 map 7
+
 map 8
+
 map 9
+
 map 10
+
 reduce 1
+
 reduce 2
+
 reduce 3
+
 reduce 4
+
 reduce 5
+
 reduce 6
+
 reduce 7
+
 reduce 8
+
 reduce 9
+
 reduce 10
+
 10
 ``
 
@@ -80,25 +100,45 @@ Prints:
 
 ``
 map 1
+
 map 2
+
 map 3
+
 map 4
+
 reduce 1
+
 map 5
+
 reduce 2
+
 map 6
+
 reduce 3
+
 reduce 4
+
 map 7
+
 reduce 5
+
 map 8
+
 reduce 6
+
 map 9
+
 reduce 7
+
 map 10
+
 reduce 8
+
 reduce 9
+
 reduce 10
+
 10
 ``
 
@@ -400,7 +440,6 @@ function(array) { /* Do whatever */ }
 
 * Create queue-flow scopes so the same flow names can be used by different functions.
 * Expose the built-in ``Q`` object to make extending its prototype possible.
-* Async-capable ``.each`` method.
 
 ## License (MIT)
 

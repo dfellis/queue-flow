@@ -1,4 +1,4 @@
-var q = require('../lib/queueFlow');
+var q = require('../lib/queue-flow');
 
 exports.toArray = function(test) {
 	test.expect(1);

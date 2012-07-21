@@ -134,3 +134,22 @@ exports.async = function(test) {
 		test.done();
 	});
 };
+
+exports.everySome = function(test) {
+	test.expect(2);
+	var count = 0;
+	q([1, 2, 'buckle my shoe']).every(function(value) {
+		return value == value*1;
+	}, function(result) {
+		test.equal(false, result, 'every finds the string and barfs');
+		count++;
+		if(count == 2) test.done();
+	});
+	q([1, 2, 'buckle my show']).some(function(value) {
+		return value == value*1;
+	}, function(result) {
+		test.equal(true, result, 'some finds the first number');
+		count++;
+		if(count == 2) test.done();
+	});
+};

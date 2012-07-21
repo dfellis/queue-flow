@@ -15,7 +15,7 @@
 		"node": "*"
 	},
 	"scripts": {
-		"prepublish": "docco ./lib/queue-flow.js; uglifyjs ./lib/queue-flow.js > ./lib/queue-flow.min.js; git commit -am 'Automatic doc and minification for version $npm_package_version'; git tag $npm_package_version; git push",
+		"prepublish": "docco ./lib/queue-flow.js; uglifyjs ./lib/queue-flow.js > ./lib/queue-flow.min.js; git commit -am 'Automatic doc and minification for version $npm_package_version'; git tag $npm_package_version; git push --all",
 		"test": "nodeunit ./test/test.js"
 	}
 }

@@ -410,6 +410,7 @@ This method takes an input queue, and "flattens" out any nested arrays, passing 
 
 ```js
 q([1, 2, 3]).exec(callback, onError, cbThis); // returns new Q instance
+```
 
 This method is a variant on `map` designed to fit in well with the Node.js APIs (and other Node.js libraries). Each input value is passed into the provided callback, just like `map`, but if the value is an array, instead the arguments of the callback are populated by the array values (with a callback attached to the end if the callback is declared asynchronous).
 

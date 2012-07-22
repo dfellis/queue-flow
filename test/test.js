@@ -157,11 +157,11 @@ exports.everySome = function(test) {
 
 exports.flattenAndExec = function(test) {
 	test.expect(1);
-	q(['..'])
+	q(['.'])
 		.exec(q.async(fs.readdir), 'error', fs)
 		.flatten()
 		.map(function(filename) {
-			return ['../' + filename, 'utf8'];
+			return ['./' + filename, 'utf8'];
 		})
 		.exec(q.async(fs.readFile), null, fs)
 		.reduce(function(concat, fileData) {

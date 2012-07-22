@@ -1,4 +1,5 @@
 var q = require('../lib/queue-flow');
+var fs = require('fs');
 
 exports.toArray = function(test) {
 	test.expect(1);
@@ -152,4 +153,26 @@ exports.everySome = function(test) {
 		count++;
 		if(count == 2) test.done();
 	});
+};
+
+exports.flattenAndExec = function(test) {
+	test.expect(1);
+	q(['..'])
+		.exec(q.async(fs.readdir), 'error', fs)
+		.flatten()
+		.map(function(filename) {
+			return ['../' + filename, 'utf8'];
+		})
+		.exec(q.async(fs.readFile), null, fs)
+		.reduce(function(concat, fileData) {
+			return concat + fileData;
+		}, function(result) {
+			test.equal(typeof(result), 'string', 'all files concatenated properly');
+			test.done();
+		}, '');
+	q('error')
+		.each(function(errorOut) {
+			test.ok(false, 'No error should have occurred');
+			test.done();
+		});
 };

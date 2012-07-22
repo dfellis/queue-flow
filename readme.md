@@ -398,6 +398,25 @@ This method drains the attached queue and constructs a "normal" array, which is 
 function(array) { /* Do whatever */ }
 ```
 
+### ``Q.prototype.flatten`` Method
+
+```js
+q([1, [2, [3]]]).flatten(depth); // returns new Q instance
+```
+
+This method takes an input queue, and "flattens" out any nested arrays, passing along their values to a new queue in the order found. An optional ``depth`` value can be specified to determine how many layers of arrays should be flattened out. This method is heavily inspired by the underscore.js method of the same name.
+
+### ``Q.prototype.exec`` Method
+
+```js
+q([1, 2, 3]).exec(callback, onError, cbThis); // returns new Q instance
+
+This method is a variant on `map` designed to fit in well with the Node.js APIs (and other Node.js libraries). Each input value is passed into the provided callback, just like `map`, but if the value is an array, instead the arguments of the callback are populated by the array values (with a callback attached to the end if the callback is declared asynchronous).
+
+It is assumed that this callback returns its result in an array of two values (or calls the callback with two arguments), `error` and `result`, in that order. How `exec` behaves when an `error` value is present depends on the `onError` variable.
+
+`onError` is a "magic" variable that does one of 4 things depending on the type of value it is. If the variable is not defined (or is "falsy") then `exec` just ignores the bad result and continues on to the next one in the queue. If the variable is a `Function`, then it stops pulling values from the queue and calls the specified function. If it is a `string`, then it pushes the `error, value` combo into the named queue specified. If it is any other kind of "truthy" value, then `exec` stops execution right then and does nothing else.
+
 ## Planned Features
 
 * Create queue-flow scopes so the same flow names can be used by different functions.

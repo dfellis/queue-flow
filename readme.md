@@ -221,6 +221,10 @@ q.async(func) // returns: modified func
 
 Any ``Function`` object will succeed on this method, but it is up to the developer to make sure his arguments list matches the one specified for the queue processor his function is being given to.
 
+### ``q.ns`` Helper Method
+
+This method takes no arguments, and returns a wholly-independent queue-flow namespace. Queue flows from one *cannot* interact with queue flows from another (without writing some bridge code manually). This is to allow methods to work with named queues that have generic, easy-to-follow names, like ``error`` or ``requests`` and not have to worry about collisions with the queue flows spawned by other functions that might want to use the same name.
+
 ### ``Q`` Constructor
 
 ```js
@@ -417,10 +421,6 @@ This method is a variant on `map` designed to fit in well with the Node.js APIs 
 It is assumed that this callback returns its result in an array of two values (or calls the callback with two arguments), `error` and `result`, in that order. How `exec` behaves when an `error` value is present depends on the `onError` variable.
 
 `onError` is a "magic" variable that does one of 4 things depending on the type of value it is. If the variable is not defined (or is "falsy") then `exec` just ignores the bad result and continues on to the next one in the queue. If the variable is a `Function`, then it stops pulling values from the queue and calls the specified function. If it is a `string`, then it pushes the `error, value` combo into the named queue specified. If it is any other kind of "truthy" value, then `exec` stops execution right then and does nothing else.
-
-## Planned Features
-
-* Create queue-flow scopes so the same flow names can be used by different functions.
 
 ## License (MIT)
 

@@ -176,3 +176,12 @@ exports.flattenAndExec = function(test) {
 			test.done();
 		});
 };
+
+exports.namespaces = function(test) {
+	test.expect(1);
+	var foo = q.ns();
+	var bar = q.ns();
+
+	test.notStrictEqual(foo('baz'), bar('baz'), 'separate namespaces create separate Q instances with the same name');
+	test.done();
+};

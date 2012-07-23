@@ -55,7 +55,7 @@ q('static')
 			// There are query parameters, so not a static resource
 			return [[req, res, new Error('Not a static resource')]];
 		}
-		return [null, [req, res, tokenized.path]];
+		return [null, [req, res, "." + tokenized.path]];
 	}, 'sad')
 	.exec(q.async(function(req, res, path, next) {
 		fs.readFile(path, function(err, data) {
@@ -105,8 +105,8 @@ q('endRoute').chain('static');
 
 // Simple error handler that dumps the error to the user
 q('sad')
-	.exec(function(req, res, err) {
-		return res.end(JSON.stringify(err));
+	.exec(function(reqResErr, value) {
+		return reqResErr[1].end(reqResErr[2].message);
 	});
 
 // Define route handler queues and url matchers

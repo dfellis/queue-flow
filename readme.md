@@ -422,6 +422,14 @@ It is assumed that this callback returns its result in an array of two values (o
 
 `onError` is a "magic" variable that does one of 4 things depending on the type of value it is. If the variable is not defined (or is "falsy") then `exec` just ignores the bad result and continues on to the next one in the queue. If the variable is a `Function`, then it stops pulling values from the queue and calls the specified function. If it is a `string`, then it pushes the `error, value` combo into the named queue specified. If it is any other kind of "truthy" value, then `exec` stops execution right then and does nothing else.
 
+### ``Q.prototype.chain`` Method
+
+```js
+q([1, 2, 3]).chain(queueName); // returns original Q instance
+```
+
+This method is a simple wrapper around ``branch`` that pushes the input values into the specified queue. Useful for chaining several sub-queues into one large queue (for legibility reasons).
+
 ## License (MIT)
 
 Copyright (C) 2012 by David Ellis

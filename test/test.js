@@ -185,3 +185,12 @@ exports.namespaces = function(test) {
 	test.notStrictEqual(foo('baz'), bar('baz'), 'separate namespaces create separate Q instances with the same name');
 	test.done();
 };
+
+exports.chain = function(test) {
+	test.expect(1);
+	q([1, 2, 3]).chain('foo');
+	q('foo').toArray(function(array) {
+		test.equal(array.toString(), [1, 2, 3].toString(), 'chain pushes the output into the defined queue');
+		test.done();
+	});
+};

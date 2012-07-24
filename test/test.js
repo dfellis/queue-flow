@@ -128,12 +128,17 @@ exports.latency = function(test) {
 
 exports.async = function(test) {
 	test.expect(1);
-	q([1, 2, 3]).map(q.async(function(val, callback) {
-		callback(val*2);
-	})).toArray(function(result) {
-		test.equal([2, 4, 6].toString(), result.toString(), 'asynchronous methods also complete as expected');
-		test.done();
-	});
+	q([1, 2, 3])
+		.map(q.async(function(val, callback) {
+			callback(val*2);
+		}))
+		.map(function(val, callback) {
+			callback(val);
+		})
+		.toArray(function(result) {
+			test.equal([2, 4, 6].toString(), result.toString(), 'asynchronous methods also complete as expected');
+			test.done();
+		});
 };
 
 exports.everySome = function(test) {
@@ -158,12 +163,12 @@ exports.everySome = function(test) {
 exports.flattenAndExec = function(test) {
 	test.expect(1);
 	q(['.'])
-		.exec(q.async(fs.readdir), 'error')
+		.exec(fs.readdir, 'error')
 		.flatten()
 		.map(function(filename) {
 			return ['./' + filename, 'utf8'];
 		})
-		.exec(q.async(fs.readFile))
+		.exec(fs.readFile)
 		.reduce(function(concat, fileData) {
 			return concat + fileData;
 		}, function(result) {

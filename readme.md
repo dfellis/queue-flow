@@ -102,15 +102,27 @@ Prints:
 
 **queue-flow** builds a series of input and output queues for work to traverse from functional concept to functional concept, with reduce-style functions (that compress all values into a single result) instead having a final callback fired when the queue processing is completed.
 
-Marking a callback as an asynchronous one (needed a callback passed to it, as well) so it can be used with jQuery ``$.ajax()`` calls or Node.js libraries, is also quite simple:
+Making a callback an asynchronous one is as simple as added an extra argument for the callback passed to it at the end of the function definition.
 
 ```js
 q([1, 2, 3])
-	.map(q.async(function(val, callback) {
-		callback(val);
+	.map(function(val, callback) {
+		callback(val*2);
+	})
+	.toArray(function(result) {
+		console.log(result); // Prints [2, 4, 6]
+	});
+```
+
+If you don't want to declare an arguments list and instead use the ``arguments`` object to get the values (perhaps using the ``exec`` queue-flow method and having a variable number of arguments each time) and it needs to be async (callback appended, but in a different position each time), then you mus mark the callback as an asynchronous one with the simple ``q.async`` method, like so:
+
+```js
+q([1, 2, 3])
+	.map(q.async(function() {
+		arguments[1](arguments[0]*2);
 	}))
 	.toArray(function(result) {
-		console.log(result); // Prints [1, 2, 3]
+		console.log(result); // Prints [2, 4, 6]
 	});
 ```
 
@@ -221,6 +233,14 @@ q.async(func) // returns: modified func
 
 Any ``Function`` object will succeed on this method, but it is up to the developer to make sure his arguments list matches the one specified for the queue processor his function is being given to.
 
+### ``q.isAsync`` Helper Method
+
+This method performs the (fast-but-imperfect) guesswork on whether a provided method is asynchronous or not. First, it checks if the ``async`` property exists for the function, and then it checks if the argument length of the function matches the specified length an asynchronous function would have.
+
+```js
+q.isAsync(func, asyncArgLength) // returns: boolean
+```
+
 ### ``q.ns`` Helper Method
 
 This method takes no arguments, and returns a wholly-independent queue-flow namespace. Queue flows from one *cannot* interact with queue flows from another (without writing some bridge code manually). This is to allow methods to work with named queues that have generic, easy-to-follow names, like ``error`` or ``requests`` and not have to worry about collisions with the queue flows spawned by other functions that might want to use the same name.
@@ -317,7 +337,7 @@ There are two function signatures for the map callback:
 ```js
 {
 	sync: function(val) { return something; },
-	async: q.async(function(val, callback) { callback(something); })
+	async: function(val, callback) { callback(something); }
 }
 ```
 
@@ -334,7 +354,7 @@ There are two function signatures for the first reduce callback:
 ```js
 {
 	sync: function(prev, val) { return something; },
-	async: q.async(function(prev, val, callback) { callback(something); })
+	async: function(prev, val, callback) { callback(something); }
 }
 ```
 
@@ -356,7 +376,7 @@ There are two function signatures for the filter callback:
 ```js
 {
 	sync: function(val) { return true || false; },
-	async: q.async(function(val, callback) { callback(true || false); })
+	async: function(val, callback) { callback(true || false); }
 }
 ```
 
@@ -373,7 +393,7 @@ There are two function signatures for the branch callback:
 ```js
 {
 	sync: function(val) { return 'queueName'; },
-	async: q.async(function(val, callback) { callback('queueName'); })
+	async: function(val, callback) { callback('queueName'); }
 }
 ```
 

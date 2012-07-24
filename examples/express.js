@@ -57,13 +57,13 @@ q('static')
 		}
 		return [null, [req, res, "." + tokenized.path]];
 	}, 'sad')
-	.exec(q.async(function(req, res, path, next) {
+	.exec(function(req, res, path, next) {
 		fs.readFile(path, function(err, data) {
 			if(err) return next([req, res, new Error('Could not read file')]);
 			res.end(data);
 			next();
 		});
-	}), 'sad')
+	}, 'sad')
 	.as('endStatic');
 
 // `routes` is an object containing keys matching to subflows and values being regular expressions to be tested
@@ -71,7 +71,7 @@ var routes = {};
 
 // 'route' is a subflow that branches to any number of other sub flows based on the results of a route object
 q('route')
-	.exec(q.async(function(req, res, next) {
+	.exec(function(req, res, next) {
 		q(Object.keys(routes))
 			.reduce(function(result, route) {
 				if(!result) {
@@ -84,7 +84,7 @@ q('route')
 				}
 				next(null, [req, res, result]);
 			}, false);
-	}))
+	})
 	.filter(function(resultArr) {
 		return !resultArr[2];
 	})

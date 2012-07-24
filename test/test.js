@@ -199,3 +199,18 @@ exports.chain = function(test) {
 		test.done();
 	});
 };
+
+exports.each = function(test) {
+	test.expect(5);
+	var currVal = 0;
+	q([1, 2, 3])
+		.each(function(value) {
+			test.ok(currVal < value, 'side-effect function received one of the values, in the proper order');
+			currVal = value;
+		})
+		.toArray(function(array) {
+			test.equal(array.toString(), [1, 2, 3].toString(), 'each passes the original data along');
+			test.equal(3, currVal, 'and the side effect remains and at the proper value');
+			test.done();
+		});
+};

@@ -290,15 +290,15 @@ q('someQueue').clear('empty'); // returns Q instance
 
 This method clears out all event handlers for a given event.
 
-### ``new Q().each`` (alias ``.setHandler``) Privileged Method
+### ``new Q().setHandler`` Privileged Method
 
 ```js
-q('someQueue').each(eachCallback); // returns Q instance
+q('someQueue').setHandler(handlerCallback); // returns Q instance
 ```
 
 This method drains the queue and calls the given callback for each value. It is a very low-level queue processing function that is used internally by nearly all of the prototypal methods.
 
-The ``eachCallback`` signature is simply ``function(value, callback) { }`` where the ``callback`` takes no arguments.
+The ``handlerCallback`` signature is simply ``function(value, callback) { }`` where the ``callback`` takes no arguments and informs the queue to continue processing.
 
 ### ``new Q().push`` Privileged Method
 
@@ -323,6 +323,14 @@ q('name').closeOnEmpty(); // returns Q instance
 ```
 
 This method registers an event handler for the ``empty`` event to close the queue. Mostly used internally but may have a few other use-cases.
+
+### ``Q.prototype.each`` Method
+
+```js
+q([1,2,3]).each(eachCallback); // returns a new Q instance
+```
+
+This method performs an each operation, which can be seen as a specialization of map. The eachCallback is given a value from the queue one at a time, and the callback is expected to perform some sort of side-effect operation not affecting the queue flow in any way, as it simply creates a new queue and pushes the input values into the new output queue.
 
 ### ``Q.prototype.map`` Method
 

@@ -324,6 +324,14 @@ q('name').closeOnEmpty(); // returns Q instance
 
 This method registers an event handler for the ``empty`` event to close the queue. Mostly used internally but may have a few other use-cases.
 
+### ``Q.prototype.load`` Method
+
+```js
+q('name').load(array); // returns Q instance
+```
+
+This method is syntactic sugar for loading an array of values for the queue on top of the ``push`` Privileged Method, since using ``.apply`` on ``push`` is awkward when the queue flow reference is a long name, and worse with an unnamed queue flow, which must be saved to a variable, first, otherwise.
+
 ### ``Q.prototype.each`` Method
 
 ```js

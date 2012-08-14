@@ -3,7 +3,7 @@
 	"description": "Chainable logic built on named (or not) queues for Javascript and Node.js",
 	"homepage": "https://github.com/dfellis/queue-flow",
 	"author": "David Ellis",
-	"version": "0.3.6",
+	"version": "0.3.7",
 	"main": "./lib/queue-flow",
 	"dependencies": {},
 	"devDependencies": {

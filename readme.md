@@ -245,6 +245,14 @@ q.isAsync(func, asyncArgLength) // returns: boolean
 
 This method takes no arguments, and returns a wholly-independent queue-flow namespace. Queue flows from one *cannot* interact with queue flows from another (without writing some bridge code manually). This is to allow methods to work with named queues that have generic, easy-to-follow names, like ``error`` or ``requests`` and not have to worry about collisions with the queue flows spawned by other functions that might want to use the same name.
 
+### ``q.tuple`` Helper Method
+
+This method takes a Javascript object and converts it into an array of tuples (two value arrays). Each tuple is a set of ``[key, value]`` pairs from the original object. This is useful if you wish to operate on each item in the object independently of one another.
+
+```js
+q.tuple(obj) // returns: array of tuples [[key1, value1], [key2, value2], ... ]
+```
+
 ### ``Q`` Constructor
 
 ```js

@@ -222,3 +222,16 @@ exports.tuple = function(test) {
 	}).length, 13, 'tuple properly converts object into array of key-value tuples');
 	test.done();
 };
+
+exports.syncExec = function(test) {
+	test.expect(1);
+	q([['foo', 'bar']])
+		.exec(function(foo, bar) {
+			if(foo == 'foo' && bar == 'bar') throw 'baz';
+		}, 'syncError');
+	q('syncError')
+		.each(function(error) {
+			test.equal(error, 'baz');
+			test.done();
+		});
+};

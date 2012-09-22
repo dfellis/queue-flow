@@ -301,9 +301,9 @@ flatten to (<code>true</code> == 1 in this case). Intended to be nearly identica
     <span class="k">return</span> <span class="nx">outQueue</span><span class="p">;</span>
   <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-39">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-39">&#182;</a>               </div>               <p><code>exec</code> is a slightly modified version of <code>map</code> that takes the input value, and if it is an
 array, provides each value as an independent argument to the provided callback. It also assumes
-the method returns an array of two values, or if async calls the callback with two arguments.
-These arguments are considered to be <code>error</code> and <code>value</code>, in that order, which matches most of
-the Node.js API callbacks. A second parameter can also be set to determine what <code>exec</code> does when
+the method returns a correct result and throws an error, or if async calls the callback with two
+arguments, considered to be <code>error</code> and <code>value</code>, in that order, which matches most of the
+Node.js API callbacks. A second parameter can also be set to determine what <code>exec</code> does when
 an error is returned. If not set, <code>exec</code> simply ignores the error and value and processes the
 next item in the queue. If set to <code>true</code>, it kills the queue at this point. If set to a function,
 it kills the queue and calls the function with the error and value. If set to a string, it

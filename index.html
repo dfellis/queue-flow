@@ -4,12 +4,10 @@ title: queue-flow
 ---
 <h2>Easy-to-follow data processing with queues, flowcharts, and functional programming</h2>
 
-<p>You know a few programming languages, both static and dynamic, and you've heard good things about Node.js for handling large numbers of standard request-response type connections simultaneously, so you dust off <em>Javascript: The Good Parts</em> and some Node.js tutorials and after a quick refresher you apply your prior experience at this new server-side environment. Just another dynamic server-side language like Ruby, Python, or Perl, right?</p>
-
-<p>But soon, you find your code has become difficult to read and refactor as you are</p>
+<p>Tired of this?</p>
 
 {% highlight js %}
-lost(arg, function(err, result) {
+stuck(arg, function(err, result) {
     if(err) return console.log(err);
     In(result, function(err, result) {
         if(err) return console.log(err);
@@ -21,157 +19,107 @@ lost(arg, function(err, result) {
 });
 {% endhighlight %}
 
-<p>("lost in callback hell", by the way). You just want to accomplish what the outermost function wants to do, so you specify closure callbacks within it with the code that's specific to this function. But there's so much boilerplate and indentation! And because they are closures, you just use the outer scope variables at will, which means later on when you decide that the two innermost functions would be useful elsewhere, you can't actually just define it as an independent function without significantly refactoring your code, and since the callbacks are required to have a fixed set of input arguments, how would you pass the needed variables in, anyways? (Hint: <code>Function.prototype.bind</code>, but it's still painful.) So you just copy-paste the block over and mangle it manually.</p>
+<p>("stuck in callback hell")</p>
 
-<p>So, you start looking for solutions. <code>Fibers</code> looks very promising, but you quickly realize that any code you write on top of it, and any library that you depend on that uses it, cannot be used in the browser, and cannot even be used in Node.js for Windows, and come to understand why so little of the Node.js community relies on Fibers. So, believing that a quality solution can't be done in the Javascript syntax proper, you decide to take a look at a popular solution, and the most popular by far is Async.</p>
-
-<p>Following the wisdom of the crowd, you start to refactor your code using the async library, and it does help some, but is this any better than what we had before?</p>
-
-{% highlight js %}
-async.waterfall([
-    function(next) {
-        lost(arg, next);
-    },
-    function(result, next) {
-        In(result, next);
-    },
-    function(result, next) {
-        callback(result, next);
-    }
-], function(err, result) {
-    if(err) return console.log(err);
-    hell(result);
-});
-{% endhighlight %}
-
-<p>We've now made the same task take more lines of code, and we still have two indent levels, removing only one from the previous situation, and reusing these functions is still difficult, as each async method "verb" must be called within the callback used by the prior method's callback (perhaps the entire <code>async.waterfall</code> call is inside of the callback for an <code>async.reduce</code>). It has saved <em>some</em> boilerplate, but it doesn't feel like much.</p>
-
-{% highlight js %}
-async.waterfall([
-    lost.bind(this, arg),
-    In,
-    callback
-], function(err, result) {
-    if(err) return console.log(err);
-    hell(result);
-});
-{% endhighlight %}
-
-<p>(To be fair to <code>async</code>, the above code has been reduced in size, but that's only because the steps are simple single-function-call steps. Any time more than two statements are involved, like the final callback, you need to define a closure to handle it, as all of the callbacks within the array (true of all of the flow-control methods of async) must have the same kind of behavior.)</p>
-
-<p>To be honest, the ECMAScript 5 standard of Javascript has some nice functional programming concepts added to the <code>Array</code> object. <code>map, reduce, filter, forEach</code>, etc. You could write generic functions that manipulated data in certain ways, and then combine them in whatever order you desired to process chunks of data. Then when it's done, you decide perhaps classify it based on the result and then feed it to one of a few functions specialized for that kind of data and continue the processing until you're ready to return something to the user.</p>
-
-<p>But there are a few things stopping that in Node.js or even AJAX-heavy browser development:</p>
-
-<ol>
-<li>This is a blocking API, so no AJAX allowed, no Node.js libraries allowed.</li>
-<li>Each step in the process will only start its work <em>after</em> the previous step has completed <em>all</em> of the work it has to do, meaning significant latency, especially when the processing time of the callback is unpredictable like in I/O calls.</li>
-<li>The "branching" logic between these bits of processing is still imperative, so it may have the same tendency to be copy-pasted, but this is the least important of worries.</li>
-</ol>
-
-<h2>Enter <em>queue-flow</em></h2>
-
-<p><code>queue-flow</code> promises to solve these problems, presenting an async-capable (but not required) API similar to ECMAScript 5 or underscore.js, while introducing a few core concepts to give you much expresive power, all built within the standard Javascript syntax so it will work in whatever JS environment you place it in.</p>
-
-<p>The core concepts are these: you define queues that data is put into and processed according to a series of steps. These queues can be named so you can specifically refer to them from functions or other queues. The standard <code>each, map, reduce, filter</code>, etc method "verbs" are defined, along with an <code>exec</code> verb specifically designed to easily work with Node.js-style APIs, and a <code>branch</code> verb for deciding which queue a given piece of data should continue on. The <code>branch</code> verb is the final concept: if you think of each step in the queue as a processing box in a flowchart, <code>branch</code> is your decision box, making it possible for conditional behavior and loops to be defined with your queues.</p>
+<p>What if you could write it like this?</p>
 
 {% highlight js %}
 q([arg])
-    .exec(lost, 'error')
+    .exec(notStuck, 'error')
     .exec(In, 'error')
     .exec(callback, 'error')
-    .each(hell_or_not);
+    .each(hell);
 q('error')
     .each(console.log);
 {% endhighlight %}
 
-<p>Unlike with <code>async</code>, the method "verbs" you want to apply to your data can be mixed and matched in whatever order you find necessary, so where you would *need* to write an anonymous callback for a group of function calls that don't all have Node-style method and callback signatures, or simply need the arguments in a different order than what the previous method provides them in, with <code>queue-flow</code>, you can insert very simple <code>map</code> calls to massage the data into the format needed by the next <code>exec</code>.</p>
+<p>Tired of this?</p>
 
 {% highlight js %}
-q('foo')
-    .exec(bar, 'error')
-    .map(function(result) { return [result.one, result.two]; })
-    .exec(baz, 'error')
-    .map(function(result) { return [result[0], result[2], result[1]]; })
-    .exec(etc, 'error')
+async.waterfall([
+    dealing.bind(this, arg),
+    function with(result, callback) {
+        if(result.foo == 'branch1') {
+            async.waterfall([
+                nested.bind(this, result),
+                branches
+            ], callback);
+        } else {
+            async.waterfall([
+                making.bind(this, result),
+                code,
+                difficult
+            ], callback);
+        }
+    },
+    to.bind(this, 'const1', 'const2')
+], function(err, result) {
+    if(err) return console.log(err);
+    follow(result);
+});
+{% endhighlight %}
+
+<p>("dealing with nested branches making code difficult to follow")</p>
+
+<p>What if you could write it like this?</p>
+
+{% highlight js %}
+q([arg])
+    .exec(dealing, 'error')
+    .branch(function with(result) { return result.foo == 'branch1' ? 'branch1' : 'branch2'; });
+q('branch1')
+    .exec(nested, 'error')
+    .exec(branches, 'error')
+    .chain('branchesRejoined');
+q('branch2')
+    .exec(making, 'error')
+    .exec(code, 'error')
+    .exec(easy, 'error')
+    .chain('branchesRejoined');
+q('branchesRejoined')
+    .exec(to.bind(this, 'const1', 'const2'), 'error');
+    .each(follow);
+q('error')
+    .each(console.log);
+{% endhighlight %}
+
+<p>Tired of this?</p>
+
+{% highlight js %}
+someRemoteCall('arg', function recursing(err, result) {
+    if(err) return console.log(err);
+    if(result == 'good') {
+        doSomethingElse();
+    } else {
+        someRemoteCall(result, recursing); // Arg! Stack Overflow!? But I can't unroll this recursion because it's an async function, right?
+    }
+});
+{% endhighlight %}
+
+<p>How about this?</p>
+
+{% highlight js %}
+q('recursiveCall')
+    .exec(someRemoteCall, 'error')
+    .branch(function(result) { return result == 'good' ? 'doSomethingElse' : 'recursiveCall'; }); // Cannot blow the stack!
+q('error')
+    .each(console.log);
+q('doSomethingElse')
     ...
 {% endhighlight %}
 
-<p>Any time you need to do a series of actions with asynchronous code, which you would traditionally use the <code>async</code> library for, a single queue will do the same thing, and with fewer lines of code and fewer indents. If you only need to do it once, queue a static array like in the first example. If you expect to do this operation several times, create a named queue like the example above and then</p>
+<p><code>queue-flow</code> makes async and sync data processing code easy to read like <code>Fibers</code> (it doesn't look like fibers code, but it is easy to follow like it) while not altering the Javascript language itself like <code>async</code>, giving you the best of both worlds, along with some other advantages:
 
-{% highlight js %}
-q('foo').push(val1, val2, val3);
-{% endhighlight %}
+<ul>
+    <li>queues in queue-flow are simply temporary storage for the consuming method "verb" you use. These "verbs" create new, anonymous queues so they can be chained together easily for a terse, easy-to-understand syntax.</li>
+    <li>Because there are anonymous queues in between, as one "verb" completes its task on one item to process, it can pass that along to the next "verb" in the chain to process while it starts to tackle the next item. If most of your "verbs" are dealing with I/O (database, file system, network connection, etc), then you very quickly will keep all of the other processes in your "pipeline" saturated, while still guaranteeing First-In-First-Out.</li>
+    <li>Don't want that guarantee that the first request in is the first response out (such as for serving web pages?) <code>queue-flow</code> allows its constructor function to be overridden, and <a href="https://github.com/dfellis/sloppy-queue-flow">sloppy-queue-flow</a> breaks queue order, turning your queue into essentially a task list of operations to perform on independent data.</li>
+    <li>Named queues, <code>branch</code>, and <code>chain</code> allow you to turn your queues into a flowchart of actions to perform, allowing you to organize your async tasks in easy-to-understand chunks just as functions organize imperative code into easy-to-reuse chunks, and all imperative constructs (<code>if, while, for</code>) can be replicated with <code>branch</code>.</li>
+</ul>
 
-<p>and each value will be run through the steps listed for that queue.</p>
+<p>Still not convinced? <a href="/queue-flow/2012/09/22/why-queue-flow/">Check out more examples on why <code>queue-flow</code> is better than <code>async</code></a>.</p>
 
-<p>But there's another advantage with using <code>queue-flow</code> over <code>async</code>. In between each queue step listed in your queue is actually an anonymous queue gluing the steps together. What this means is, that if your tasks are all (or mostly) async I/O with little local processing, once the first value is processed by the first step and its value is passed on to the next step, the first step will immediately start processing the second value while the second step is processing the first value.</p>
-
-<p>Your queue is then essentially a pipeline, and will try to keep all of the stages of the pipeline as "full" as possible, just like a CPU pipeline, while keeping execution in-order. Yes, this analogy does imply that there certainly could be an out-of-order execution pipeline. <code>queue-flow</code> allows its constructor function to be overridden for alternative behaviors, and there is already one more constructor function, <a href="https://github.com/dfellis/sloppy-queue-flow">sloppy-queue-flow</a>, for when execution order doesn't matter at all (like handling web page requests).</p>
-
-<p>So, you may be asking yourself, <code>queue-flow</code> handles things like <code>async</code>'s <code>series, waterfall, map, reduce</code>, etc, and <code>sloppy-queue-flow</code> gives you <code>parallel</code>, but what about <code>whilst</code> and <code>auto</code>? How can a queue handle that?</p>
-
-<p>The first, <code>whilst</code>, can be handled with the concept of named queues:</p>
-
-{% highlight js %}
-q('whileTrue')
-    .map(function(val, callback) {
-        doSomething(callback);
-    })
-    .filter(function(val) { return !!val; })
-    .chain('whileTrue');
-q('whileTrue').push(true);
-{% endhighlight %}
-
-<p><code>chain</code> is simply a <code>branch</code> that always goes to the same queue, in this case it links into itself recursively, where the <code>filter</code> acts as the break out of the recursive loop, as it has the power to block values from continuing. The <code>auto</code> concept can be seen in <a href="https://github.com/dfellis/queue-flow/blob/master/examples/graph.js">one of the included examples</a>, solving a dependency graph and processing the results in the correct order, also implemented with just a <code>filter, map,</code> and <code>chain</code>, and one more queue that the <code>filter</code> pushes into for actually processing items removed from the apparently infinite loop.</p>
-
-<p><code>async</code> has a <code>queue</code> verb, but there is no richness to it. There only "verb" it understands is essentially <code>each</code>, and there is a <code>drain</code> for executing code when the queue has no more items. <code>queue-flow</code> has far more verbs to employ, and a richer event system, as well:</p>
-
-{% highlight js %}
-q('someQueue').on('empty', function() { /* Analogous to an async queue's drain */ });
-q('someQueue').on('close', function() {
-    /* Queues in queue-flow can be empty but waiting for values to arrive.
-       Long running queues that execute some sort of continues process,
-       such as request-response actions. Named queues must be manually
-       .close()'d, while queues that are simply given an array to process
-       automatically close just like async's queue.                       */
-});
-q('someQueue').on('push', function(pushedVal) {
-    /* Not possible in async's queues, we can watch when a queue is given
-       new data and log this, inspect the data, and even return false to
-       tell the queue to ignore it (though I recommend using filter instead) */
-});
-q('someQueue').on('pull', function(pulledVal) {
-    /* Similarly, when a queue's action (map, reduce, filter, whatever) is
-       ready for the next value, this event will be executed, allowing more
-       detailed performance logging of the queue, making it possible to
-       determine where the bottleneck is in your pipeline.                  */
-});
-{% endhighlight %}
-
-<p>These <code>on</code> event registers return the queue they register to, so they can be chained to each other and placed within the queue they are monitoring directly (perfect for the anonymous intermediate queues, although you can give them a name with <code>.as('name')</code>, as well. <code>as</code> makes it possible to implement a rarely-used <code>switch</code> behavior (that it was actually designed for): initializing hardware that has been left in some state of initialization, but now with async code (which is perfect if you're communicating to the hardware over ethernet, USB, etc with Node.js):</p>
-
-{% highlight js %}
-q('beginInitialization')
-    .branch(determineHardwareState);
-
-q('state0')
-    .each(initialize)
-    .as('state1')
-    .each(checkMemory)
-    .as('state2')
-    .each(loadConfiguration)
-    .as('state3')
-    .each(startExecution)
-    .chain('initialized');
-
-q('initialized')
-    .toArray(registerHardware);
-
-q('beginInitialization').push(device0, device1, device2);
-{% endhighlight %}
-
-<p>Now the <em>flow</em> of your data through your <em>queues</em> can be defined at a high level, while your lower-level decisions are handled within your functions, which can be kept general purpose and reusable between many queues. It can be a mix of sync and async code, they can be reordered with a simple select-click-and-drag because they're all at the same indent level. Linear steps are kept perfectly linear, functions are kept easily reusable. Developers are kept sane.</p>
+<p>Want to learn more? <a href="/queue-flow/2012/09/21/tutorial/">Check out the tutorial for <code>queue-flow</code></a> with neat figures explaining the behavior of <code>queue-flow</code> and its many method verbs. After that, you can <a href="/queue-flow/2012/09/21/api/">read the API documentation</a> for a summary of all of <code>queue-flow</code>'s features, or simply <a href="/queue-flow/docs/queue-flow.html">read the annotated source code, yourself,</a> which is updated right when new releases of <code>queue-flow</code> are published (see the nifty <a href="https://github.com/dfellis/queue-flow/blob/master/prepublish.sh">prepublish script</a>).</p>
 
 <h2>License (MIT)</h2>
 

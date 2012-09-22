@@ -20,7 +20,7 @@ body {
 
 .wrapper {
   width: 640px;
-  margin: 0 auto;
+  margin: 0 auto 0 200px;
   background: #DEDEDE;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
@@ -30,6 +30,22 @@ body {
   -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 1px, rgba(0, 0, 0, 0.45) 0 3px 10px;
   -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 1px, rgba(0, 0, 0, 0.45) 0 3px 10px;
   box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 1px, rgba(0, 0, 0, 0.45) 0 3px 10px;
+}
+
+.sidebar {
+    position: fixed;
+    left: 0px;
+    top: 100px;
+    width: 175px;
+    background: #DEDEDE;
+    -webkit-border-radius: 0px 8px 8px 0px;
+    -moz-border-radius: 0px 8px 8px 0px;
+    -ms-border-radius: 0px 8px 8px 0px;
+    -o-border-radius: 0px 8px 8px 0px;
+    border-radius: 0px 8px 8px 0px;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 1px, rgba(0, 0, 0, 0.45) 0 3px 10px;
+    -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 1px, rgba(0, 0, 0, 0.45) 0 3px 10px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 1px, rgba(0, 0, 0, 0.45) 0 3px 10px;
 }
 
 header, section, footer {

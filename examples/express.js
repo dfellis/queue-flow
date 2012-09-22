@@ -39,8 +39,8 @@ q('session')
 		global.sessions[session] = global.sessions[session] ? global.sessions[session] : {};
 		res.session = global.sessions[session];
 		
-		// Return no error and pass along the req and res objects
-		return [null, [req, res]];
+		// Return the req and res objects
+		return [req, res];
 	})
 	.as('endSession');
 
@@ -53,9 +53,9 @@ q('static')
 		
 		if(tokenized.path != tokenized.pathname) {
 			// There are query parameters, so not a static resource
-			return [[req, res, new Error('Not a static resource')]];
+			throw [req, res, new Error('Not a static resource')];
 		}
-		return [null, [req, res, "." + tokenized.path]];
+		return [req, res, "." + tokenized.path];
 	}, 'sad')
 	.exec(function(req, res, path, next) {
 		fs.readFile(path, function(err, data) {

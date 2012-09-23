@@ -38,7 +38,7 @@ q('error')
 {% highlight js %}
 async.waterfall([
     dealing.bind(this, arg),
-    function with(result, callback) {
+    function With(result, callback) {
         if(result.foo == 'branch1') {
             async.waterfall([
                 nested.bind(this, result),
@@ -66,7 +66,9 @@ async.waterfall([
 {% highlight js %}
 q([arg])
     .exec(dealing, 'error')
-    .branch(function with(result) { return result.foo == 'branch1' ? 'branch1' : 'branch2'; });
+    .branch(function With(result) {
+        return result.foo == 'branch1' ? 'branch1' : 'branch2';
+    });
 q('branch1')
     .exec(nested, 'error')
     .exec(branches, 'error')
@@ -91,7 +93,9 @@ someRemoteCall('arg', function recursing(err, result) {
     if(result == 'good') {
         doSomethingElse();
     } else {
-        someRemoteCall(result, recursing); // Arg! Stack Overflow!? But I can't unroll this recursion because it's an async function, right?
+        someRemoteCall(result, recursing);
+        // Arg! Stack Overflow!?
+        // But I can't unroll this recursion because it's an async function, right?
     }
 });
 {% endhighlight %}
@@ -101,7 +105,9 @@ someRemoteCall('arg', function recursing(err, result) {
 {% highlight js %}
 q('recursiveCall')
     .exec(someRemoteCall, 'error')
-    .branch(function(result) { return result == 'good' ? 'doSomethingElse' : 'recursiveCall'; }); // Cannot blow the stack!
+    .branch(function(result) {
+        return result == 'good' ? 'doSomethingElse' : 'recursiveCall';
+    }); // Cannot blow the stack!
 q('error')
     .each(console.log);
 q('doSomethingElse')

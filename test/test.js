@@ -3,10 +3,31 @@ var fs = require('fs');
 
 exports.toArray = function(test) {
 	test.expect(1);
-	q([1, 2, 3]).toArray(function(result) {
-		test.equal([1, 2, 3].toString(), result.toString(), 'array passes through the queue');
-		test.done();
-	});
+	q([1, 2, 3])
+		.toArray(function(result) {
+			test.equal([1, 2, 3].toString(), result.toString(), 'array passes through the queue');
+			test.done();
+		});
+};
+
+exports.toArrayNamedQueue = function(test) {
+	test.expect(1);
+	q([1, 2, 3]).toArray('testToArrayNamedQueue');
+	q('testToArrayNamedQueue')
+		.each(function(result) {
+			test.equal([1, 2, 3].toString(), result.toString(), 'array passed to named queue');
+			test.done();
+		});
+};
+
+exports.toArrayAnonQueue = function(test) {
+	test.expect(1);
+	q([1, 2, 3])
+		.toArray()
+		.each(function(result) {
+			test.equal([1, 2, 3].toString(), result.toString(), 'array passed on in anonymous queue');
+			test.done();
+		});
 };
 
 exports.as = function(test) {
@@ -38,22 +59,50 @@ exports.map = function(test) {
 
 exports.reduce = function(test) {
 	test.expect(1);
-	q([1, 2, 3]).reduce(function(prev, curr) {
-		return prev + curr;
-	}, function(result) {
-		test.equal(6, result, 'queue reduced properly');
-		test.done();
-	}, 0);
+	q([1, 2, 3])
+		.reduce(function(prev, curr) {
+			return prev + curr;
+		}, function(result) {
+			test.equal(6, result, 'queue reduced properly');
+			test.done();
+		}, 0);
+};
+
+exports.reduceNamedQueue = function(test) {
+	test.expect(1);
+	q([1, 2, 3])
+		.reduce(function(prev, curr) {
+			return prev + curr;
+		}, 'testReduceNamedQueue', 0);
+	q('testReduceNamedQueue')
+		.each(function(result) {
+			test.equal(6, result, 'reduce passed to named queue');
+			test.done();
+		});
+};
+
+exports.reduceAnonQueue = function(test) {
+	test.expect(1);
+	q([1, 2, 3])
+		.reduce(function(prev, curr) {
+			return prev + curr;
+		}, null, 0)
+		.each(function(result) {
+			test.equal(6, result, 'reduce passed to anon queue');
+			test.done();
+		});
 };
 
 exports.filter = function(test) {
 	test.expect(1);
-	q([1, 2, 'skip a few', 99, 100]).filter(function(value) {
-		return value == value + 0;
-	}).toArray(function(result) {
-		test.equal([1, 2, 99, 100].toString(), result.toString(), 'queue properly filtered');
-		test.done();
-	});
+	q([1, 2, 'skip a few', 99, 100])
+		.filter(function(value) {
+			return value == value + 0;
+		})
+		.toArray(function(result) {
+			test.equal([1, 2, 99, 100].toString(), result.toString(), 'queue properly filtered');
+			test.done();
+		});
 };
 
 exports.on = function(test) {
@@ -81,29 +130,33 @@ exports.on = function(test) {
 
 exports.branch = function(test) {
 	test.expect(3);
-	q([1, 2, 'skip a few', 99, 100]).branch(function(value) {
-		if(value == value + 0) {
-			return value > 50 ? 'big' : 'small';
-		} else {
-			return 'invalid';
-		}
-	});
+	q([1, 2, 'skip a few', 99, 100])
+		.branch(function(value) {
+			if(value == value + 0) {
+				return value > 50 ? 'big' : 'small';
+			} else {
+				return 'invalid';
+			}
+		});
 	var num = 0;
-	q('big').toArray(function(result) {
-		test.equal([99, 100].toString(), result.toString(), 'big queue properly populated');
-		num++;
-		if(num == 3) test.done();
-	});
-	q('small').toArray(function(result) {
-		test.equal([1, 2].toString(), result.toString(), 'small queue properly populated');
-		num++;
-		if(num == 3) test.done();
-	});
-	q('invalid').toArray(function(result) {
-		test.equal(['skip a few'].toString(), result.toString(), 'invalid queue properly populated');
-		num++;
-		if(num == 3) test.done();
-	});
+	q('big')
+		.toArray(function(result) {
+			test.equal([99, 100].toString(), result.toString(), 'big queue properly populated');
+			num++;
+			if(num == 3) test.done();
+		});
+	q('small')
+		.toArray(function(result) {
+			test.equal([1, 2].toString(), result.toString(), 'small queue properly populated');
+			num++;
+			if(num == 3) test.done();
+		});
+	q('invalid')
+		.toArray(function(result) {
+			test.equal(['skip a few'].toString(), result.toString(), 'invalid queue properly populated');
+			num++;
+			if(num == 3) test.done();
+		});
 };
 
 exports.latency = function(test) {
@@ -144,20 +197,48 @@ exports.async = function(test) {
 exports.everySome = function(test) {
 	test.expect(2);
 	var count = 0;
-	q([1, 2, 'buckle my shoe']).every(function(value) {
-		return value == value*1;
-	}, function(result) {
-		test.equal(false, result, 'every finds the string and barfs');
-		count++;
-		if(count == 2) test.done();
-	});
-	q([1, 2, 'buckle my show']).some(function(value) {
-		return value == value*1;
-	}, function(result) {
-		test.equal(true, result, 'some finds the first number');
-		count++;
-		if(count == 2) test.done();
-	});
+	q([1, 2, 'buckle my shoe'])
+		.every(function(value) {
+			return value == value*1;
+		}, function(result) {
+			test.equal(false, result, 'every finds the string and barfs');
+			count++;
+			if(count == 2) test.done();
+		});
+		q([3, 4, 'shut the door']).some(function(value) {
+			return value == value*1;
+		}, function(result) {
+			test.equal(true, result, 'some finds the first number');
+			count++;
+			if(count == 2) test.done();
+		});
+};
+
+exports.everySomeNamedQueue = function(test) {
+	// No need to test both branches because they use the same underlying method
+	// and previous test confirmed the logic is sound for both.
+	test.expect(1);
+	q([5, 6, 'grab some sticks'])
+		.every(function(value) {
+			return value == value*1;
+		}, 'testEveryNamedQueue');
+	q('testEveryNamedQueue')
+		.each(function(result) {
+			test.equal(false, result, 'every finds the string and barfs');
+			test.done();
+		});
+};
+
+exports.everySomeAnonQueue = function(test) {
+	test.expect(1);
+	q([7, 8, 'open the gate'])
+		.some(function(value) {
+			return value == value*1;
+		})
+		.each(function(result) {
+			test.equal(true, result, 'some finds the first number');
+			test.done();
+		});
 };
 
 exports.flattenAndExec = function(test) {

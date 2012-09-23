@@ -1,6 +1,7 @@
 ---
 layout: site
 title: Why queue-flow?
+subtitle: What makes queue-flow better than async or Fibers?
 ---
 You know a few programming languages, both static and dynamic, and you've heard good things about Node.js for handling large numbers of standard request-response type connections simultaneously, so you dust off *Javascript: The Good Parts* and some Node.js tutorials and after a quick refresher you apply your prior experience at this new server-side environment. Just another dynamic server-side language like Ruby, Python, or Perl, right?
 

@@ -22,7 +22,34 @@ lost(arg, function(err, result) {
 
 ("lost in callback hell", by the way). You just want to accomplish what the outermost function wants to do, so you specify closure callbacks within it with the code that's specific to this function. But there's so much boilerplate and indentation! And because they are closures, you just use the outer scope variables at will, which means later on when you decide that the two innermost functions would be useful elsewhere, you can't actually just define it as an independent function without significantly refactoring your code, and since the callbacks are required to have a fixed set of input arguments, how would you pass the needed variables in, anyways? (Hint: ``Function.prototype.bind``, but it's still painful.) So you just copy-paste the block over and mangle it manually.
 
-So, you start looking for solutions. ``Fibers`` looks very promising, but you quickly realize that any code you write on top of it, and any library that you depend on that uses it, cannot be used in the browser, and cannot even be used in Node.js for Windows, and come to understand why so little of the Node.js community relies on Fibers. So, believing that a quality solution can't be done in the Javascript syntax proper, you decide to take a look at a popular solution, and the most popular by far is Async.
+So, you start looking for solutions. ``Fibers`` looks very promising, but you quickly realize that any code you write on top of it, and any library that you depend on that uses it, cannot be used in the browser, and cannot even be used in Node.js for Windows, and come to understand why so little of the Node.js community relies on Fibers.
+
+Then you read up on some other CommonJS standards (since Node relies heavily on CommonJS) and find out about Promises. You see an implementation for node, but this is an improvement?
+
+{% highlight js %}
+var when = require("promise").when;
+function printFirstAndLast(items){
+    // print the first and last item
+    when(findFirst(items), sys.puts);
+    when(findLast(items), sys.puts);
+}
+function findFirst(items){
+    // return the first item
+    return when(items, function(items){
+        return items[0];
+    });
+}
+function findLast(items){
+    // return the last item
+    return when(items, function(items){
+        return items[items.length - 1];
+    });
+}
+{% endhighlight %}
+
+There's so much boilerplate involved with promises that it completely obscures what it is you're actually trying to accomplish. Then you find out [it was intended to be a language construct and mostly hidden away from your code,](http://en.wikipedia.org/wiki/Futures_and_promises) and it makes sense why: it's roughly equivalent in capabilities to Fibers, but with a very bulky syntax so it can still work in the browser.
+
+So, believing that a quality solution can't be done in the Javascript syntax proper, you decide to take a look at a popular solution, and the most popular by far is Async.
 
 Following the wisdom of the crowd, you start to refactor your code using the async library, and it does help some, but is this any better than what we had before?
 

@@ -305,14 +305,16 @@ exports.tuple = function(test) {
 };
 
 exports.syncExec = function(test) {
-	test.expect(1);
+	test.expect(3);
 	q([['foo', 'bar']])
 		.exec(function(foo, bar) {
 			if(foo == 'foo' && bar == 'bar') throw 'baz';
 		}, 'syncError');
 	q('syncError')
-		.each(function(error) {
-			test.equal(error, 'baz');
+		.each(function(errorArr) {
+			test.equal(errorArr[0], 'baz');
+            test.equal(errorArr[1], undefined);
+            test.equal(errorArr[2].toString(), 'foo,bar');
 			test.done();
 		});
 };

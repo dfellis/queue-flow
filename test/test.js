@@ -320,9 +320,17 @@ exports.syncExec = function(test) {
 };
 
 exports.exists = function(test) {
-    test.expect(2);
+    test.expect(3);
     q('exists');
     test.equal(q.exists('exists'), true, 'existing queue exists!');
     test.equal(q.exists('notExists'), false, 'notExisting queue does not exist!');
-    test.done();
+    q('exists')
+        .on('close', function() {
+            setTimeout(function() {
+                test.equal(q.exists('exists'), false, 'closed object correctly deleted');
+                test.done();
+            }, 50); // handler for 'close' event can return false and block the closing of the queue
+            // so it actually runs *just before* the closing occurs
+        })
+        .close();
 };

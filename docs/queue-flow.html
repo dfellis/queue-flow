@@ -30,7 +30,7 @@ or decides it's an unnamed queue and returns said queue.</p>             </td>  
     <span class="p">}</span>
   <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p><code>exists</code> returns whether or not a named queue exists in
 this <code>qEnv</code></p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">q</span><span class="p">.</span><span class="nx">exists</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">exists</span><span class="p">(</span><span class="nx">queueName</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">!!</span><span class="nx">namedQueues</span><span class="p">[</span><span class="nx">queueName</span><span class="p">];</span>
+        <span class="k">return</span> <span class="o">!!</span><span class="nx">namedQueues</span><span class="p">[</span><span class="nx">queueName</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span><span class="p">(</span><span class="nx">namedQueues</span><span class="p">[</span><span class="nx">queueName</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span><span class="p">;</span>
     <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p><code>async</code> attaches an <code>async</code> property to a given object
 and returns said object. Alias <code>cps</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">q</span><span class="p">.</span><span class="nx">cps</span> <span class="o">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">async</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">async</span><span class="p">(</span><span class="nx">method</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">method</span><span class="p">.</span><span class="nx">async</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
@@ -122,15 +122,19 @@ calls the special handler function, if it's ready.</p>             </td>        
             <span class="p">}</span>
           <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
             <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-              <span class="k">if</span><span class="p">(</span><span class="nx">handler</span> <span class="k">instanceof</span> <span class="nb">Function</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">handler</span><span class="p">(</span><span class="s1">&#39;close&#39;</span><span class="p">);</span>
-              <span class="p">}</span>
+                            <span class="kd">var</span> <span class="nx">tempHandler</span> <span class="o">=</span> <span class="nx">handler</span><span class="p">;</span>
+                            <span class="nx">handler</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
               <span class="nx">eventHandlers</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
               <span class="nx">queue</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
-              <span class="nx">handler</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
               <span class="nx">self</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+                            <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">namedQueues</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">queue</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="k">if</span><span class="p">(</span><span class="nx">namedQueues</span><span class="p">[</span><span class="nx">queue</span><span class="p">]</span> <span class="o">===</span> <span class="k">this</span><span class="p">)</span> <span class="k">delete</span> <span class="nx">namedQueues</span><span class="p">[</span><span class="nx">queue</span><span class="p">];</span>
+                            <span class="p">}.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">));</span>
               <span class="k">delete</span> <span class="k">this</span><span class="p">;</span>
-            <span class="p">},</span> <span class="mi">0</span><span class="p">);</span>
+                            <span class="k">if</span><span class="p">(</span><span class="nx">tempHandler</span> <span class="k">instanceof</span> <span class="nb">Function</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">tempHandler</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="s1">&#39;close&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
+                            <span class="p">}</span>
+            <span class="p">}.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>
           <span class="p">}</span>
         <span class="p">}</span>
         <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">flushQueue</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>

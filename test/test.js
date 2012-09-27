@@ -318,3 +318,11 @@ exports.syncExec = function(test) {
 			test.done();
 		});
 };
+
+exports.exists = function(test) {
+    test.expect(2);
+    q('exists');
+    test.equal(q.exists('exists'), true, 'existing queue exists!');
+    test.equal(q.exists('notExists'), false, 'notExisting queue does not exist!');
+    test.done();
+};

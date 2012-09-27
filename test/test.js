@@ -334,3 +334,14 @@ exports.exists = function(test) {
         })
         .close();
 };
+
+exports.kill = function(test) {
+    test.expect(2);
+    q('toKill').kill();
+    test.equal(q.exists('toKill'), false, 'kills the queue, immediately');
+    q('toKill')
+        .chain('toAlsoKill');
+    q('toKill').kill();
+    test.equal(q.exists('toAlsoKill'), false, 'kills the subqueue, immediately');
+    test.done();
+};

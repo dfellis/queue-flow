@@ -253,26 +253,19 @@ original value <em>only</em> if the callback returns true.</p>             </td>
   <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-36">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-36">&#182;</a>               </div>               <p><code>branch</code> creates several named output queues and pushes the input queue
 values into one of those queues based on the return value of the callback
 (the return value is the name of the queue it belongs to)</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">Q</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">branch</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">branch</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">branches</span> <span class="o">=</span> <span class="p">{};</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">setHandler</span><span class="p">((</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">branches</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">branch</span><span class="p">)</span> <span class="p">{</span>
-          <span class="nx">q</span><span class="p">(</span><span class="nx">branch</span><span class="p">)[</span><span class="nx">value</span><span class="p">]();</span>
-        <span class="p">});</span>
-      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setHandler</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span><span class="p">(</span><span class="o">!!</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">isAsync</span><span class="p">(</span><span class="nx">callback</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="p">{</span>
           <span class="nx">callback</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">setResult</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">branches</span><span class="p">[</span><span class="nx">result</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
             <span class="nx">q</span><span class="p">(</span><span class="nx">result</span><span class="p">).</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
           <span class="p">},</span> <span class="nx">next</span><span class="p">));</span>
         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
           <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">callback</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
-          <span class="nx">branches</span><span class="p">[</span><span class="nx">result</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
           <span class="nx">q</span><span class="p">(</span><span class="nx">result</span><span class="p">).</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
           <span class="nx">next</span><span class="p">();</span>
         <span class="p">}</span>
       <span class="p">}</span>
-    <span class="p">}).</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">));</span>
+    <span class="p">}.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">));</span>
     <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
   <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-37">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-37">&#182;</a>               </div>               <p><code>everySome</code> helper function that is used to implement <code>Q.prototype.every</code>
 and <code>Q.prototype.some</code>, similar to <code>reduce</code>, the behavior of <code>everySome</code>

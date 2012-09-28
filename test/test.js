@@ -137,7 +137,12 @@ exports.branch = function(test) {
 			} else {
 				return 'invalid';
 			}
-		});
+		})
+        .on('close', function() {
+            q('big').close();
+            q('small').close();
+            q('invalid').close();
+        });
 	var num = 0;
 	q('big')
 		.toArray(function(result) {
@@ -274,11 +279,14 @@ exports.namespaces = function(test) {
 
 exports.chain = function(test) {
 	test.expect(1);
-	q([1, 2, 3]).chain('foo');
-	q('foo').toArray(function(array) {
-		test.equal(array.toString(), [1, 2, 3].toString(), 'chain pushes the output into the defined queue');
-		test.done();
-	});
+	q([1, 2, 3])
+        .chain('foo')
+        .on('close', function() { q('foo').close(); });
+	q('foo')
+        .toArray(function(array) {
+		    test.equal(array.toString(), [1, 2, 3].toString(), 'chain pushes the output into the defined queue');
+		    test.done();
+	    });
 };
 
 exports.each = function(test) {

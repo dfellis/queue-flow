@@ -187,10 +187,11 @@ exports.latency = function(test) {
 exports.async = function(test) {
 	test.expect(1);
 	q([1, 2, 3])
-		.map(q.async(function(val, callback) {
-			callback(val*2);
-		}))
 		.map(function(val, callback) {
+			callback(val*2);
+		})
+		.mapAsync(function() {
+            var val = arguments[0], callback = arguments[1];
 			callback(val);
 		})
 		.toArray(function(result) {
@@ -383,4 +384,18 @@ exports.multiBranchChain = function(test) {
         .each(eachFuncBuilder('another', 'other received the value'));
     q('queues')
         .each(eachFuncBuilder('another', 'queues received the value'));
+};
+
+exports.sync = function(test) {
+    test.expect(1);
+    function syncFuncWithOptionalParam(val, opt) {
+        if(opt) return val / opt;
+        return val / 2;
+    }
+    q([2, 4, 6, 8, 10])
+        .mapSync(syncFuncWithOptionalParam)
+        .toArray(function(arr) {
+            test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'mapSync did not pass a callback function');
+            test.done();
+        });
 };

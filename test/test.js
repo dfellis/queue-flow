@@ -353,3 +353,34 @@ exports.kill = function(test) {
     test.equal(q.exists('toAlsoKill'), false, 'kills the subqueue, immediately');
     test.done();
 };
+
+exports.multiBranchChain = function(test) {
+    var testCount = 0, testTotal = 6;
+    test.expect(testTotal);
+    function eachFuncBuilder(expectedVal, explanatoryText) {
+        return function(val) {
+            test.equal(val, expectedVal, explanatoryText);
+            testCount++;
+            if(testCount == testTotal) test.done();
+        };
+    }
+    q(['foo'])
+        .chain(['bar', 'baz']);
+    q('bar')
+        .each(eachFuncBuilder('foo', 'bar received the value'));
+    q('baz')
+        .each(eachFuncBuilder('foo', 'baz received the value'));
+    q(['another', 'queue'])
+        .branch(function(val) {
+            if(val == 'queue') return 'queue';
+            return ['three', 'other', 'queues'];
+        });
+    q('queue')
+        .each(eachFuncBuilder('queue', 'queue received queue!'));
+    q('three')
+        .each(eachFuncBuilder('another', 'three received the value'));
+    q('other')
+        .each(eachFuncBuilder('another', 'other received the value'));
+    q('queues')
+        .each(eachFuncBuilder('another', 'queues received the value'));
+};

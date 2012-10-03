@@ -139,9 +139,11 @@ exports.branch = function(test) {
 			}
 		})
         .on('close', function() {
-            q('big').close();
-            q('small').close();
-            q('invalid').close();
+			process.nextTick(function() {
+	            q('big').close();
+		        q('small').close();
+			    q('invalid').close();
+			});
         });
 	var num = 0;
 	q('big')
@@ -282,7 +284,7 @@ exports.chain = function(test) {
 	test.expect(1);
 	q([1, 2, 3])
         .chain('foo')
-        .on('close', function() { q('foo').close(); });
+        .on('close', function() { process.nextTick(function() { q('foo').close(); }); });
 	q('foo')
         .toArray(function(array) {
 		    test.equal(array.toString(), [1, 2, 3].toString(), 'chain pushes the output into the defined queue');

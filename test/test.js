@@ -116,7 +116,7 @@ exports.on = function(test) {
 		})
 		.on('empty', function() {
 			test.ok(true, 'empty event fired');
-            test.done();
+			test.done();
 		})
 		.toArray(function() { });
 	q([1, 2, 3])
@@ -140,9 +140,9 @@ exports.branch = function(test) {
 		})
         .on('close', function() {
 			process.nextTick(function() {
-	            q('big').close();
-		        q('small').close();
-			    q('invalid').close();
+				q('big').close();
+				q('small').close();
+				q('invalid').close();
 			});
         });
 	var num = 0;
@@ -193,7 +193,7 @@ exports.async = function(test) {
 			callback(val*2);
 		})
 		.mapAsync(function() {
-            var val = arguments[0], callback = arguments[1];
+			var val = arguments[0], callback = arguments[1];
 			callback(val);
 		})
 		.toArray(function(result) {
@@ -283,13 +283,13 @@ exports.namespaces = function(test) {
 exports.chain = function(test) {
 	test.expect(1);
 	q([1, 2, 3])
-        .chain('foo')
-        .on('close', function() { process.nextTick(function() { q('foo').close(); }); });
+		.chain('foo')
+		 .on('close', function() { process.nextTick(function() { q('foo').close(); }); });
 	q('foo')
-        .toArray(function(array) {
-		    test.equal(array.toString(), [1, 2, 3].toString(), 'chain pushes the output into the defined queue');
-		    test.done();
-	    });
+		.toArray(function(array) {
+			test.equal(array.toString(), [1, 2, 3].toString(), 'chain pushes the output into the defined queue');
+			test.done();
+		});
 };
 
 exports.each = function(test) {
@@ -324,80 +324,92 @@ exports.syncExec = function(test) {
 	q('syncError')
 		.each(function(errorArr) {
 			test.equal(errorArr[0], 'baz');
-            test.equal(errorArr[1], undefined);
-            test.equal(errorArr[2].toString(), 'foo,bar');
+			test.equal(errorArr[1], undefined);
+			test.equal(errorArr[2].toString(), 'foo,bar');
 			test.done();
 		});
 };
 
 exports.exists = function(test) {
-    test.expect(3);
-    q('exists');
-    test.equal(q.exists('exists'), true, 'existing queue exists!');
-    test.equal(q.exists('notExists'), false, 'notExisting queue does not exist!');
-    q('exists')
-        .on('close', function() {
-            setTimeout(function() {
-                test.equal(q.exists('exists'), false, 'closed object correctly deleted');
-                test.done();
-            }, 50); // handler for 'close' event can return false and block the closing of the queue
-            // so it actually runs *just before* the closing occurs
-        })
-        .close();
+	test.expect(3);
+	q('exists');
+	test.equal(q.exists('exists'), true, 'existing queue exists!');
+	test.equal(q.exists('notExists'), false, 'notExisting queue does not exist!');
+	q('exists')
+		.on('close', function() {
+			setTimeout(function() {
+				test.equal(q.exists('exists'), false, 'closed object correctly deleted');
+				test.done();
+			}, 50); // handler for 'close' event can return false and block the closing of the queue
+			// so it actually runs *just before* the closing occurs
+		})
+		.close();
 };
 
 exports.kill = function(test) {
-    test.expect(2);
-    q('toKill').kill();
-    test.equal(q.exists('toKill'), false, 'kills the queue, immediately');
-    q('toKill')
-        .chain('toAlsoKill');
-    q('toKill').kill();
-    test.equal(q.exists('toAlsoKill'), false, 'kills the subqueue, immediately');
-    test.done();
+	test.expect(2);
+	q('toKill').kill();
+	test.equal(q.exists('toKill'), false, 'kills the queue, immediately');
+	q('toKill')
+		.chain('toAlsoKill');
+	q('toKill').kill();
+	test.equal(q.exists('toAlsoKill'), false, 'kills the subqueue, immediately');
+	test.done();
 };
 
 exports.multiBranchChain = function(test) {
-    var testCount = 0, testTotal = 6;
-    test.expect(testTotal);
-    function eachFuncBuilder(expectedVal, explanatoryText) {
-        return function(val) {
-            test.equal(val, expectedVal, explanatoryText);
-            testCount++;
-            if(testCount == testTotal) test.done();
-        };
-    }
-    q(['foo'])
-        .chain(['bar', 'baz']);
-    q('bar')
-        .each(eachFuncBuilder('foo', 'bar received the value'));
-    q('baz')
-        .each(eachFuncBuilder('foo', 'baz received the value'));
-    q(['another', 'queue'])
-        .branch(function(val) {
-            if(val == 'queue') return 'queue';
-            return ['three', 'other', 'queues'];
-        });
-    q('queue')
-        .each(eachFuncBuilder('queue', 'queue received queue!'));
-    q('three')
-        .each(eachFuncBuilder('another', 'three received the value'));
-    q('other')
-        .each(eachFuncBuilder('another', 'other received the value'));
-    q('queues')
-        .each(eachFuncBuilder('another', 'queues received the value'));
+	var testCount = 0, testTotal = 6;
+	test.expect(testTotal);
+	function eachFuncBuilder(expectedVal, explanatoryText) {
+		return function(val) {
+			test.equal(val, expectedVal, explanatoryText);
+			testCount++;
+			if(testCount == testTotal) test.done();
+		};
+	}
+	q(['foo'])
+		.chain(['bar', 'baz']);
+	q('bar')
+		.each(eachFuncBuilder('foo', 'bar received the value'));
+	q('baz')
+		.each(eachFuncBuilder('foo', 'baz received the value'));
+	q(['another', 'queue'])
+		.branch(function(val) {
+			if(val == 'queue') return 'queue';
+			return ['three', 'other', 'queues'];
+		});
+	q('queue')
+		.each(eachFuncBuilder('queue', 'queue received queue!'));
+	q('three')
+		.each(eachFuncBuilder('another', 'three received the value'));
+	q('other')
+		.each(eachFuncBuilder('another', 'other received the value'));
+	q('queues')
+		.each(eachFuncBuilder('another', 'queues received the value'));
 };
 
 exports.sync = function(test) {
-    test.expect(1);
-    function syncFuncWithOptionalParam(val, opt) {
-        if(opt) return val / opt;
-        return val / 2;
-    }
-    q([2, 4, 6, 8, 10])
-        .mapSync(syncFuncWithOptionalParam)
-        .toArray(function(arr) {
-            test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'mapSync did not pass a callback function');
-            test.done();
-        });
+	test.expect(1);
+	function syncFuncWithOptionalParam(val, opt) {
+		if(opt) return val / opt;
+		return val / 2;
+	}
+	q([2, 4, 6, 8, 10])
+		.mapSync(syncFuncWithOptionalParam)
+		.toArray(function(arr) {
+			test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'mapSync did not pass a callback function');
+			test.done();
+		});
+};
+
+exports.asyncEventHandler = function(test) {
+	test.expect(1);
+	q([1, 2, 3, 4, 5])
+		.on('pull', function(val, callback) {
+			setTimeout(callback.bind(this, val == 1), 25);
+		})
+		.each(function(val) {
+			test.equal(1, val, 'only the first value is allowed through, even if event handler is async');
+			test.done();
+		});
 };

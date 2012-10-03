@@ -249,15 +249,15 @@ exports.everySomeAnonQueue = function(test) {
 		});
 };
 
-exports.flattenAndExec = function(test) {
+exports.flattenAndNode = function(test) {
 	test.expect(1);
 	q(['.'])
-		.exec(fs.readdir, 'error')
+		.node(fs.readdir, 'error')
 		.flatten()
 		.map(function(filename) {
 			return ['./' + filename, 'utf8'];
 		})
-		.exec(fs.readFile)
+		.node(fs.readFile)
 		.reduce(function(concat, fileData) {
 			return concat + fileData;
 		}, function(result) {
@@ -315,10 +315,10 @@ exports.tuple = function(test) {
 	test.done();
 };
 
-exports.syncExec = function(test) {
+exports.syncNode = function(test) {
 	test.expect(3);
 	q([['foo', 'bar']])
-		.exec(function(foo, bar) {
+		.node(function(foo, bar) {
 			if(foo == 'foo' && bar == 'bar') throw 'baz';
 		}, 'syncError');
 	q('syncError')
@@ -413,3 +413,26 @@ exports.asyncEventHandler = function(test) {
 			test.done();
 		});
 };
+
+exports.exec = function(test) {
+    var count = 0, total = 3;
+    test.expect(total);
+    q([function(val) {
+        test.equal('Hello, World!', val, 'provided function got the argument');
+        count++;
+        if(count == total) test.done();
+    }, function(val, callback) {
+        test.equal(callback instanceof Function, true, 'provided function a callback because it was async');
+        count++;
+        if(count == total) test.done();
+        process.nextTick(callback);
+    }, 'notAFunction'])
+        .exec(['Hello, World!'], 'execError');
+    q('execError')
+        .each(function(errResArgs) {
+            test.equal(errResArgs[2], 'notAFunction', 'The string was thrown into the error queue');
+            count++;
+            if(count == total) test.done();
+        });
+};
+

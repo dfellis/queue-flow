@@ -131,7 +131,7 @@ q('doSomethingElse')
 
 Still not convinced? [Check out more examples on why ``queue-flow`` is better than ``async``.](http://dfellis.github.com/queue-flow/2012/09/22/why-queue-flow/)
 
-Want to learn more? [Check out the tutorial for ``queue-flow``](http://dfellis.github.com/queue-flow/2012/09/21/tutorial/) with neat figures explaining the behavior of ``queue-flow`` and its many method verbs. After that, you can [read the API documentation](http://dfellis.github.com/queue-flow/2012/09/21/api/) for a summary of all of ``queue-flow``'s features, or simply [read the annotated source code, yourself](http://dfellis.github.com/queue-flow/docs/queue-flow.html), which is updated right when new releases of ``queue-flow`` are published (see the nifty [prepublish script](https://github.com/dfellis/queue-flow/blob/master/prepublish.sh)).
+Want to learn more? [Check out the tutorial for ``queue-flow``](http://dfellis.github.com/queue-flow/2012/09/21/tutorial/) with neat figures explaining the behavior of ``queue-flow`` and its many method verbs. After that, you can [read the annotated source code, yourself](http://dfellis.github.com/queue-flow/docs/queue-flow.html), which is updated right when new releases of ``queue-flow`` are published (see the nifty [prepublish script](https://github.com/dfellis/queue-flow/blob/master/prepublish.sh)). (If youre just looking for an API reference, just read the left-hand column and ignore the source code on the right.)
 
 ## License (MIT)
 

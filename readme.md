@@ -33,9 +33,9 @@ What if you could write it like this?
 
 ```js
 q([arg])
-    .exec(notStuck, 'error')
-    .exec(In, 'error')
-    .exec(callback, 'error')
+    .node(notStuck, 'error')
+    .node(In, 'error')
+    .node(callback, 'error')
     .each(hell);
 q('error')
     .each(console.log);
@@ -73,21 +73,21 @@ What if you could write it like this?
 
 ```js
 q([arg])
-    .exec(dealing, 'error')
+    .node(dealing, 'error')
     .branch(function With(result) {
         return result.foo == 'branch1' ? 'branch1' : 'branch2';
     });
 q('branch1')
-    .exec(nested, 'error')
-    .exec(branches, 'error')
+    .node(nested, 'error')
+    .node(branches, 'error')
     .chain('branchesRejoined');
 q('branch2')
-    .exec(making, 'error')
-    .exec(code, 'error')
-    .exec(easy, 'error')
+    .node(making, 'error')
+    .node(code, 'error')
+    .node(easy, 'error')
     .chain('branchesRejoined');
 q('branchesRejoined')
-    .exec(to.bind(this, 'const1', 'const2'), 'error');
+    .node(to.bind(this, 'const1', 'const2'), 'error');
     .each(follow);
 q('error')
     .each(console.log);
@@ -112,7 +112,7 @@ How about this?
 
 ```js
 q('recursiveCall')
-    .exec(someRemoteCall, 'error')
+    .node(someRemoteCall, 'error')
     .branch(function(result) {
         return result == 'good' ? 'doSomethingElse' : 'recursiveCall';
     }); // Cannot blow the stack!

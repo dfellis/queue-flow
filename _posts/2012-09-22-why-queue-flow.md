@@ -97,27 +97,27 @@ But there are a few things stopping that in Node.js or even AJAX-heavy browser d
 
 ``queue-flow`` promises to solve these problems, presenting an async-capable (but not required) API similar to ECMAScript 5 or underscore.js, while introducing a few core concepts to give you much expresive power, all built within the standard Javascript syntax so it will work in whatever JS environment you place it in.
 
-The core concepts are these: you define queues that data is put into and processed according to a series of steps. These queues can be named so you can specifically refer to them from functions or other queues. The standard ``each, map, reduce, filter``, etc method "verbs" are defined, along with an ``exec`` verb specifically designed to easily work with Node.js-style APIs, and a ``branch`` verb for deciding which queue a given piece of data should continue on. The ``branch`` verb is the final concept: if you think of each step in the queue as a processing box in a flowchart, ``branch`` is your decision box, making it possible for conditional behavior and loops to be defined with your queues.
+The core concepts are these: you define queues that data is put into and processed according to a series of steps. These queues can be named so you can specifically refer to them from functions or other queues. The standard ``each, map, reduce, filter``, etc method "verbs" are defined, along with a ``node`` verb specifically designed to easily work with Node.js-style APIs, and a ``branch`` verb for deciding which queue a given piece of data should continue on. The ``branch`` verb is the final concept: if you think of each step in the queue as a processing box in a flowchart, ``branch`` is your decision box, making it possible for conditional behavior and loops to be defined with your queues.
 
 {% highlight js %}
 q([arg])
-    .exec(lost, 'error')
-    .exec(In, 'error')
-    .exec(callback, 'error')
+    .node(lost, 'error')
+    .node(In, 'error')
+    .node(callback, 'error')
     .each(hell_or_not);
 q('error')
     .each(console.log);
 {% endhighlight %}
 
-Unlike with ``async``, the method "verbs" you want to apply to your data can be mixed and matched in whatever order you find necessary, so where you would *need* to write an anonymous callback for a group of function calls that don't all have Node-style method and callback signatures, or simply need the arguments in a different order than what the previous method provides them in, with ``queue-flow``, you can insert very simple ``map`` calls to massage the data into the format needed by the next ``exec``.
+Unlike with ``async``, the method "verbs" you want to apply to your data can be mixed and matched in whatever order you find necessary, so where you would *need* to write an anonymous callback for a group of function calls that don't all have Node-style method and callback signatures, or simply need the arguments in a different order than what the previous method provides them in, with ``queue-flow``, you can insert very simple ``map`` calls to massage the data into the format needed by the next ``node``.
 
 {% highlight js %}
 q('foo')
-    .exec(bar, 'error')
+    .node(bar, 'error')
     .map(function(result) { return [result.one, result.two]; })
-    .exec(baz, 'error')
+    .node(baz, 'error')
     .map(function(result) { return [result[0], result[2], result[1]]; })
-    .exec(etc, 'error')
+    .node(etc, 'error')
     ...
 {% endhighlight %}
 

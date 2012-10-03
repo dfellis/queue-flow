@@ -33,7 +33,7 @@ exports.toArrayAnonQueue = function(test) {
 exports.as = function(test) {
 	test.expect(1);
 	q([1, 2, 3]).as('test1');
-	q('test1').closeOnEmpty().toArray(function(result) {
+	q('test1').close().toArray(function(result) {
 		test.equal([1, 2, 3].toString(), result.toString(), 'named queue properly referenceable');
 		test.done();
 	});
@@ -41,7 +41,7 @@ exports.as = function(test) {
 
 exports.push = function(test) {
 	test.expect(1);
-	q('test2').push(1, 2, 3).closeOnEmpty().toArray(function(result) {
+	q('test2').push(1, 2, 3).close().toArray(function(result) {
 		test.equal([1, 2, 3].toString(), result.toString(), 'named queue with elements pushed after-the-fact properly referenceable');
 		test.done();
 	});
@@ -110,20 +110,22 @@ exports.on = function(test) {
 	q([1, 2, 3])
 		.on('close', function() {
 			test.ok(true, 'close event fired');
-			test.done();
 		})
 		.on('pull', function() {
 			test.ok(true, 'pull event fired');
 		})
 		.on('empty', function() {
 			test.ok(true, 'empty event fired');
+            test.done();
 		})
 		.toArray(function() { });
 	q([1, 2, 3])
 		.on('close', function() {
+            console.log('close-2');
 			return false;
 		})
 		.toArray(function() {
+            console.log('toarray-2');
 			test.ok(false, 'array method never executes final callback');
 		});
 };

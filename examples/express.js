@@ -27,7 +27,7 @@ var q = require('../lib/queue-flow');
 // `session` is a very simple session handler subflow that is totally the wrong
 // way to do sessions that will be perfectly fine for the example.
 q('session')
-	.exec(function(req, res) {
+	.node(function(req, res) {
 		// Construct the session store if necessary (not efficient, but this is just a demonstration
 		global.sessions = global.sessions ? global.sessions : {};
 		
@@ -47,7 +47,7 @@ q('session')
 // 'static' is a sub-flow that takes the request and response objects that first verifies if actually a static request,
 // then it attempts to read the file, and if not, passes an error to the 'sad' path.
 q('static')
-	.exec(function(req, res) {
+	.node(function(req, res) {
 		// Extract the url components
 		var tokenized = url.parse(req.url);
 		
@@ -57,7 +57,7 @@ q('static')
 		}
 		return [req, res, "." + tokenized.path];
 	}, 'sad')
-	.exec(function(req, res, path, next) {
+	.node(function(req, res, path, next) {
 		fs.readFile(path, function(err, data) {
 			if(err) return next([req, res, new Error('Could not read file')]);
 			res.end(data);
@@ -71,7 +71,7 @@ var routes = {};
 
 // 'route' is a subflow that branches to any number of other sub flows based on the results of a route object
 q('route')
-	.exec(function(req, res, next) {
+	.node(function(req, res, next) {
 		q(Object.keys(routes))
 			.reduce(function(result, route) {
 				if(!result) {
@@ -105,27 +105,27 @@ q('endRoute').chain('static');
 
 // Simple error handler that dumps the error to the user
 q('sad')
-	.exec(function(reqResErr, value) {
+	.node(function(reqResErr, value) {
 		return reqResErr[1].end(reqResErr[2].message);
 	});
 
 // Define route handler queues and url matchers
 routes['index'] = /^\/$/;
 q('index')
-	.exec(function(req, res) {
+	.node(function(req, res) {
 		res.end('Hello, world!');
 	});
 
 routes['setSessionProperties'] = /^\/setSession/;
 q('setSessionProperties')
-	.exec(function(req, res) {
+	.node(function(req, res) {
 		res.session.foo = "bar";
 		res.end('Set something on the session object for you!');
 	});
 
 routes['getSession'] = /^\/getSession/;
 q('getSession')
-	.exec(function(req, res) {
+	.node(function(req, res) {
 		res.end(JSON.stringify(res.session));
 	});
 

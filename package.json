@@ -5,6 +5,11 @@
 	"homepage": "https://github.com/dfellis/queue-flow",
 	"author": "David Ellis",
 	"version": "0.5.13",
+    "bugs": "https://github.com/dfellis/queue-flow/issues",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com:dfellis/queue-flow.git"
+    },
 	"main": "./lib/queue-flow",
 	"dependencies": {},
 	"devDependencies": {
@@ -13,7 +18,7 @@
 		"uglify-js": "*"
 	},
 	"engines": {
-		"node": "*"
+		"node": ">=0.6"
 	},
 	"scripts": {
         "prepublish": "./prepublish.sh",

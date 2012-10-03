@@ -121,11 +121,9 @@ exports.on = function(test) {
 		.toArray(function() { });
 	q([1, 2, 3])
 		.on('close', function() {
-            console.log('close-2');
 			return false;
 		})
 		.toArray(function() {
-            console.log('toarray-2');
 			test.ok(false, 'array method never executes final callback');
 		});
 };

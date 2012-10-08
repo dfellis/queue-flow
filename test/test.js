@@ -436,3 +436,15 @@ exports.exec = function(test) {
         });
 };
 
+exports.eachAsync = function(test) {
+    test.expect(2);
+    q([1])
+        .each(function(val, next) {
+            test.equal(next instanceof Function, true, 'each can be accessed asynchronously');
+            next('bogus value');
+        })
+        .each(function(val) {
+            test.equal(val, 1, 'async each ignores returned values');
+            test.done();
+        });
+};

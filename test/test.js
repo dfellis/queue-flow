@@ -448,3 +448,32 @@ exports.eachAsync = function(test) {
             test.done();
         });
 };
+
+exports.asyncMapReduce = function(test) {
+    test.expect(1);
+    q([0, 1, 2, 3, 4, 5])
+        .map(function(val, cb) {
+            setTimeout(function() { cb(val * 2) }, Math.random() * 100);
+        })
+        .reduce(function(sum, cur, cb) {
+            cb(sum + cur);
+        }, function(result) {
+            test.equal(result, 30, 'All values doubled and summed together');
+            test.done();
+        }, 0);
+};
+
+exports.asyncEachMapReduce = function(test) {
+    test.expect(1);
+    q([0, 1, 2, 3, 4, 5])
+        .each(function(){})
+        .map(function(val, cb) {
+            setTimeout(function() { cb(val * 2) }, Math.random() * 100);
+        })
+        .reduce(function(sum, cur, cb) {
+            cb(sum + cur);
+        }, function(result) {
+            test.equal(result, 30, 'All values logged, doubled, and summed together');
+            test.done();
+        }, 0);
+};

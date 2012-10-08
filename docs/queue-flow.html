@@ -213,9 +213,16 @@ method.</p>             </td>             <td class="code">               <div c
       <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">outQueue</span><span class="p">[</span><span class="nx">value</span><span class="p">]();</span>
       <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">callback</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
-        <span class="nx">outQueue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
-        <span class="nx">next</span><span class="p">();</span>
+                <span class="k">if</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">isAsync</span><span class="p">(</span><span class="nx">callback</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">callback</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">outQueue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+                        <span class="nx">next</span><span class="p">();</span>
+                    <span class="p">});</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">callback</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+            <span class="nx">outQueue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+            <span class="nx">next</span><span class="p">();</span>
+                <span class="p">}</span>
       <span class="p">}</span>
     <span class="p">});</span>
     <span class="k">return</span> <span class="nx">outQueue</span><span class="p">;</span>

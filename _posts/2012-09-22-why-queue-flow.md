@@ -143,11 +143,11 @@ q('whileTrue')
         doSomething(callback);
     })
     .filter(function(val) { return !!val; })
-    .chain('whileTrue');
+    .branch('whileTrue');
 q('whileTrue').push(true);
 {% endhighlight %}
 
-``chain`` is simply a ``branch`` that always goes to the same queue, in this case it links into itself recursively, where the ``filter`` acts as the break out of the recursive loop, as it has the power to block values from continuing. The ``auto`` concept can be seen in [one of the included examples](https://github.com/dfellis/queue-flow/blob/master/examples/graph.js), solving a dependency graph and processing the results in the correct order, also implemented with just a ``filter, map,`` and ``chain``, and one more queue that the ``filter`` pushes into for actually processing items removed from the apparently infinite loop.
+in this case ``branch`` links the queue into itself recursively, where the ``filter`` acts as the break out of the recursive loop, as it has the power to block values from continuing. The ``auto`` concept can be seen in [one of the included examples](https://github.com/dfellis/queue-flow/blob/master/examples/graph.js), solving a dependency graph and processing the results in the correct order, also implemented with just a ``filter, map,`` and ``branch``, and one more queue that the ``filter`` pushes into for actually processing items removed from the apparently infinite loop.
 
 ``async`` has a ``queue`` verb, but there is no richness to it. There only "verb" it understands is essentially ``each``, and there is a ``drain`` for executing code when the queue has no more items. ``queue-flow`` has far more verbs to employ, and a richer event system, as well:
 
@@ -187,7 +187,7 @@ q('state0')
     .each(loadConfiguration)
     .as('state3')
     .each(startExecution)
-    .chain('initialized');
+    .branch('initialized');
 
 q('initialized')
     .toArray(registerHardware);

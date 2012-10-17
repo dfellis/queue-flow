@@ -73,12 +73,12 @@ q([arg])
 q('branch1')
     .node(nested, 'error')
     .node(branches, 'error')
-    .chain('branchesRejoined');
+    .branch('branchesRejoined');
 q('branch2')
     .node(making, 'error')
     .node(code, 'error')
     .node(easy, 'error')
-    .chain('branchesRejoined');
+    .branch('branchesRejoined');
 q('branchesRejoined')
     .node(to.bind(this, 'const1', 'const2'), 'error');
     .each(follow);
@@ -121,7 +121,7 @@ q('doSomethingElse')
     <li>queues in queue-flow are simply temporary storage for the consuming method "verb" you use. These "verbs" create new, anonymous queues so they can be chained together easily for a terse, easy-to-understand syntax.</li>
     <li>Because there are anonymous queues in between, as one "verb" completes its task on one item to process, it can pass that along to the next "verb" in the chain to process while it starts to tackle the next item. If most of your "verbs" are dealing with I/O (database, file system, network connection, etc), then you very quickly will keep all of the other processes in your "pipeline" saturated, while still guaranteeing First-In-First-Out.</li>
     <li>Don't want that guarantee that the first request in is the first response out (such as for serving web pages?) <code>queue-flow</code> allows its constructor function to be overridden, and <a href="https://github.com/dfellis/sloppy-queue-flow">sloppy-queue-flow</a> breaks queue order, turning your queue into essentially a task list of operations to perform on independent data.</li>
-    <li>Named queues, <code>branch</code>, and <code>chain</code> allow you to turn your queues into a flowchart of actions to perform, allowing you to organize your async tasks in easy-to-understand chunks just as functions organize imperative code into easy-to-reuse chunks, and all imperative constructs (<code>if, while, for</code>) can be replicated with <code>branch</code>.</li>
+    <li>Named queues and <code>branch</code> allow you to turn your queues into a flowchart of actions to perform, allowing you to organize your async tasks in easy-to-understand chunks just as functions organize imperative code into easy-to-reuse chunks, and all imperative constructs (<code>if, while, for</code>) can be replicated with <code>branch</code>.</li>
 </ul>
 
 <p>Still not convinced? <a href="/queue-flow/2012/09/22/why-queue-flow/">Check out more examples on why <code>queue-flow</code> is better than <code>async</code></a>.</p>

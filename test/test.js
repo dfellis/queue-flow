@@ -280,18 +280,6 @@ exports.namespaces = function(test) {
 	test.done();
 };
 
-exports.chain = function(test) {
-	test.expect(1);
-	q([1, 2, 3])
-		.chain('foo')
-		 .on('close', function() { process.nextTick(function() { q('foo').close(); }); });
-	q('foo')
-		.toArray(function(array) {
-			test.equal(array.toString(), [1, 2, 3].toString(), 'chain pushes the output into the defined queue');
-			test.done();
-		});
-};
-
 exports.each = function(test) {
 	test.expect(5);
 	var currVal = 0;
@@ -351,13 +339,13 @@ exports.kill = function(test) {
 	q('toKill').kill();
 	test.equal(q.exists('toKill'), false, 'kills the queue, immediately');
 	q('toKill')
-		.chain('toAlsoKill');
+		.branch('toAlsoKill');
 	q('toKill').kill();
 	test.equal(q.exists('toAlsoKill'), false, 'kills the subqueue, immediately');
 	test.done();
 };
 
-exports.multiBranchChain = function(test) {
+exports.multiBranch = function(test) {
 	var testCount = 0, testTotal = 6;
 	test.expect(testTotal);
 	function eachFuncBuilder(expectedVal, explanatoryText) {
@@ -368,7 +356,7 @@ exports.multiBranchChain = function(test) {
 		};
 	}
 	q(['foo'])
-		.chain(['bar', 'baz']);
+		.branch(['bar', 'baz']);
 	q('bar')
 		.each(eachFuncBuilder('foo', 'bar received the value'));
 	q('baz')
@@ -499,5 +487,59 @@ exports.wait = function(test) {
             var endTime = new Date().getTime();
             test.ok(endTime - startTime > 1000, 'total delay time again reached');
             test.done();
+        });
+};
+
+exports.constantBranch = function(test) {
+    test.expect(1);
+    q([1, 2, 3])
+        .branch('nextOne')
+        .on('close', function() {
+            process.nextTick(function() { q('nextOne').close(); });
+        });
+    q('nextOne')
+        .toArray(function(arr) {
+            test.equal([1, 2, 3].toString(), arr.toString(), 'got the values from the branch');
+            test.done();
+        });
+};
+
+exports.referenceBranch = function(test) {
+    test.expect(1);
+    var anonNonClosingQueue = new q.Q();
+    q([1, 2, 3])
+        .branch(anonNonClosingQueue)
+        .on('close', function() {
+            process.nextTick(function() { anonNonClosingQueue.close(); });
+        });
+    anonNonClosingQueue
+        .toArray(function(arr) {
+            test.equal([1, 2, 3].toString(), arr.toString(), 'got the values into an anonymous queue');
+            test.done();
+        });
+};
+
+exports.arrayBranch = function(test) {
+    test.expect(2);
+    q([1, 2, 3])
+        .branch(['queue1', q('queue2')])
+        .on('close', function() {
+            process.nextTick(function() {
+                q('queue1').close();
+                q('queue2').close();
+            });
+        });
+    var finishedQueues = 0;
+    q('queue1')
+        .toArray(function(arr) {
+            test.equal([1, 2, 3].toString(), arr.toString(), 'first queue got the values');
+            finishedQueues++;
+            if(finishedQueues == 2) test.done();
+        });
+    q('queue2')
+        .toArray(function(arr) {
+            test.equal([1, 2, 3].toString(), arr.toString(), 'second queue got the values');
+            finishedQueues++;
+            if(finishedQueues == 2) test.done();
         });
 };

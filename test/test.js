@@ -477,3 +477,27 @@ exports.asyncEachMapReduce = function(test) {
             test.done();
         }, 0);
 };
+
+exports.wait = function(test) {
+    test.expect(4);
+    var startTime = new Date().getTime();
+    q([1, 2, 3, 4, 5])
+        .wait(50)
+        .toArray(function(arr) {
+            test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'acts like a normal each when delayed');
+            var endTime = new Date().getTime();
+            test.ok(endTime - startTime > 200, 'total delayed time is approximately reached');
+            startTime = endTime; // Reset time for next test
+            q('continue').load(arr).close();
+        })
+    q('continue')
+        .wait(function(val) {
+            return val*100;
+        })
+        .toArray(function(arr) {
+            test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'kept the correct order (good test of queue correctness)');
+            var endTime = new Date().getTime();
+            test.ok(endTime - startTime > 1000, 'total delay time again reached');
+            test.done();
+        });
+};

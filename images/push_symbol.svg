@@ -7,10 +7,38 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
-   width="583.90656"
-   height="321.03967"
-   id="svg2">
+   width="363.75974"
+   height="199.98239"
+   id="svg2"
+   inkscape:version="0.48.2 r9819"
+   sodipodi:docname="push_symbol.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1440"
+     inkscape:window-height="852"
+     id="namedview16157"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="0.60283618"
+     inkscape:cx="291.95327"
+     inkscape:cy="160.51022"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
   <defs
      id="defs4">
     <marker
@@ -23,7 +51,8 @@
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
          transform="matrix(-0.4,0,0,-0.4,-4,0)"
          id="path3847"
-         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none" />
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         inkscape:connector-curvature="0" />
     </marker>
     <marker
        refX="0"
@@ -35,7 +64,8 @@
          d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
          transform="matrix(-0.8,0,0,-0.8,-10,0)"
          id="path3841"
-         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none" />
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         inkscape:connector-curvature="0" />
     </marker>
   </defs>
   <metadata
@@ -46,12 +76,12 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
-     transform="translate(662.51984,-134.88202)"
+     transform="matrix(0.62297596,0,0,0.62297596,412.73393,-84.03624)"
      id="g5125">
     <g
        transform="translate(-744.51984,-46.480164)"
@@ -94,7 +124,8 @@
        y="438.36218"
        id="text4551"
        xml:space="preserve"
-       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"><tspan
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       sodipodi:linespacing="125%"><tspan
          x="-560"
          y="438.36218"
          id="tspan4553">.push(        ,         ,        )</tspan></text>
@@ -125,14 +156,17 @@
     <path
        d="m -380,352.36218 c -7.62432,-15.39595 11.99166,-35.33194 -180,-20"
        id="path4567"
-       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)" />
+       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)"
+       inkscape:connector-curvature="0" />
     <path
        d="m -260,352.36218 c -5.75074,-43.22797 38.78846,-97.12377 -300,-100"
        id="path4569"
-       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)" />
+       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)"
+       inkscape:connector-curvature="0" />
     <path
        d="m -140,352.36218 c 0.18303,-96.66326 -76.05854,-173.33854 -420,-180"
        id="path4571"
-       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)" />
+       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)"
+       inkscape:connector-curvature="0" />
   </g>
 </svg>

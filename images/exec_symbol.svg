@@ -10,11 +10,11 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
-   width="238.58592"
-   height="952.96033"
+   width="100.14365"
+   height="400"
    id="svg2"
    inkscape:version="0.48.2 r9819"
-   sodipodi:docname="all_symbol_figs.svg">
+   sodipodi:docname="exec_symbol.svg">
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -34,7 +34,7 @@
      fit-margin-bottom="0"
      inkscape:zoom="0.22425739"
      inkscape:cx="-1268.4726"
-     inkscape:cy="-477.37842"
+     inkscape:cy="-477.37305"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -82,7 +82,7 @@
   </metadata>
   <g
      id="g7751"
-     transform="translate(-1137.4802,85.117974)">
+     transform="matrix(0.41974465,0,0,0.41974465,-477.45123,35.722436)">
     <g
        id="g7753"
        transform="translate(1055.4802,-266.48016)">

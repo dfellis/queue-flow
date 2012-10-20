@@ -10,11 +10,11 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
-   width="238.58592"
-   height="952.96033"
+   width="100.14365"
+   height="400"
    id="svg2"
    inkscape:version="0.48.2 r9819"
-   sodipodi:docname="all_symbol_figs.svg">
+   sodipodi:docname="filter_symbol.svg">
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -34,7 +34,7 @@
      fit-margin-bottom="0"
      inkscape:zoom="0.22425739"
      inkscape:cx="-707.43292"
-     inkscape:cy="341.66125"
+     inkscape:cy="341.66662"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -76,13 +76,13 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      id="g5981"
-     transform="translate(-1137.4802,85.117974)">
+     transform="matrix(0.41974465,0,0,0.41974465,-477.45123,35.722436)">
     <g
        id="g5983"
        transform="translate(1055.4802,-266.48016)">

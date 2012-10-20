@@ -241,6 +241,10 @@ h2 {
   color: #393939;
 }
 
+h3 {
+    clear: both;
+}
+
 h3, h4, h5, h6 {
   color: #494949;
 }

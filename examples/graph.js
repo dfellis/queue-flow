@@ -58,4 +58,4 @@ q('process')
 	.each(console.log.bind(console, 'process '));
 
 // Load the items to be linearized and processed, seeding the 'self-feeding' queue
-q('linearize').load(items);
+q('linearize').concat(items);

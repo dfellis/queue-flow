@@ -138,13 +138,13 @@ exports.branch = function(test) {
 				return 'invalid';
 			}
 		})
-        .on('close', function() {
+		.on('close', function() {
 			process.nextTick(function() {
 				q('big').close();
 				q('small').close();
 				q('invalid').close();
 			});
-        });
+		});
 	var num = 0;
 	q('big')
 		.toArray(function(result) {
@@ -403,143 +403,143 @@ exports.asyncEventHandler = function(test) {
 };
 
 exports.exec = function(test) {
-    var count = 0, total = 3;
-    test.expect(total);
-    q([function(val) {
-        test.equal('Hello, World!', val, 'provided function got the argument');
-        count++;
-        if(count == total) test.done();
-    }, function(val, callback) {
-        test.equal(callback instanceof Function, true, 'provided function a callback because it was async');
-        count++;
-        if(count == total) test.done();
-        process.nextTick(callback);
-    }, 'notAFunction'])
-        .exec(['Hello, World!'], 'execError');
-    q('execError')
-        .each(function(errResArgs) {
-            test.equal(errResArgs[2], 'notAFunction', 'The string was thrown into the error queue');
-            count++;
-            if(count == total) test.done();
-        });
+	var count = 0, total = 3;
+	test.expect(total);
+	q([function(val) {
+		test.equal('Hello, World!', val, 'provided function got the argument');
+		count++;
+		if(count == total) test.done();
+	}, function(val, callback) {
+		test.equal(callback instanceof Function, true, 'provided function a callback because it was async');
+		count++;
+		if(count == total) test.done();
+		process.nextTick(callback);
+	}, 'notAFunction'])
+		.exec(['Hello, World!'], 'execError');
+	q('execError')
+		.each(function(errResArgs) {
+			test.equal(errResArgs[2], 'notAFunction', 'The string was thrown into the error queue');
+			count++;
+			if(count == total) test.done();
+		});
 };
 
 exports.eachAsync = function(test) {
-    test.expect(2);
-    q([1])
-        .each(function(val, next) {
-            test.equal(next instanceof Function, true, 'each can be accessed asynchronously');
-            next('bogus value');
-        })
-        .each(function(val) {
-            test.equal(val, 1, 'async each ignores returned values');
-            test.done();
-        });
+	test.expect(2);
+	q([1])
+		.each(function(val, next) {
+			test.equal(next instanceof Function, true, 'each can be accessed asynchronously');
+			next('bogus value');
+		})
+		.each(function(val) {
+			test.equal(val, 1, 'async each ignores returned values');
+			test.done();
+		});
 };
 
 exports.asyncMapReduce = function(test) {
-    test.expect(1);
-    q([0, 1, 2, 3, 4, 5])
-        .map(function(val, cb) {
-            setTimeout(function() { cb(val * 2) }, Math.random() * 100);
-        })
-        .reduce(function(sum, cur, cb) {
-            cb(sum + cur);
-        }, function(result) {
-            test.equal(result, 30, 'All values doubled and summed together');
-            test.done();
-        }, 0);
+	test.expect(1);
+	q([0, 1, 2, 3, 4, 5])
+		.map(function(val, cb) {
+			setTimeout(function() { cb(val * 2) }, Math.random() * 100);
+		})
+		.reduce(function(sum, cur, cb) {
+			cb(sum + cur);
+		}, function(result) {
+			test.equal(result, 30, 'All values doubled and summed together');
+			test.done();
+		}, 0);
 };
 
 exports.asyncEachMapReduce = function(test) {
-    test.expect(1);
-    q([0, 1, 2, 3, 4, 5])
-        .each(function(){})
-        .map(function(val, cb) {
-            setTimeout(function() { cb(val * 2) }, Math.random() * 100);
-        })
-        .reduce(function(sum, cur, cb) {
-            cb(sum + cur);
-        }, function(result) {
-            test.equal(result, 30, 'All values logged, doubled, and summed together');
-            test.done();
-        }, 0);
+	test.expect(1);
+	q([0, 1, 2, 3, 4, 5])
+		.each(function(){})
+		.map(function(val, cb) {
+			setTimeout(function() { cb(val * 2) }, Math.random() * 100);
+		})
+		.reduce(function(sum, cur, cb) {
+			cb(sum + cur);
+		}, function(result) {
+			test.equal(result, 30, 'All values logged, doubled, and summed together');
+			test.done();
+		}, 0);
 };
 
 exports.wait = function(test) {
-    test.expect(4);
-    var startTime = new Date().getTime();
-    q([1, 2, 3, 4, 5])
-        .wait(50)
-        .toArray(function(arr) {
-            test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'acts like a normal each when delayed');
-            var endTime = new Date().getTime();
-            test.ok(endTime - startTime > 200, 'total delayed time is approximately reached');
-            startTime = endTime; // Reset time for next test
-            q('continue').load(arr).close();
-        })
-    q('continue')
-        .wait(function(val) {
-            return val*100;
-        })
-        .toArray(function(arr) {
-            test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'kept the correct order (good test of queue correctness)');
-            var endTime = new Date().getTime();
-            test.ok(endTime - startTime > 1000, 'total delay time again reached');
-            test.done();
-        });
+	test.expect(4);
+	var startTime = new Date().getTime();
+	q([1, 2, 3, 4, 5])
+		.wait(50)
+		.toArray(function(arr) {
+			test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'acts like a normal each when delayed');
+			var endTime = new Date().getTime();
+			test.ok(endTime - startTime > 200, 'total delayed time is approximately reached');
+			startTime = endTime; // Reset time for next test
+			q('continue').concat(arr).close();
+		});
+	q('continue')
+		.wait(function(val) {
+			return val*100;
+		})
+		.toArray(function(arr) {
+			test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'kept the correct order (good test of queue correctness)');
+			var endTime = new Date().getTime();
+			test.ok(endTime - startTime > 1000, 'total delay time again reached');
+			test.done();
+		});
 };
 
 exports.constantBranch = function(test) {
-    test.expect(1);
-    q([1, 2, 3])
-        .branch('nextOne')
-        .on('close', function() {
-            process.nextTick(function() { q('nextOne').close(); });
-        });
-    q('nextOne')
-        .toArray(function(arr) {
-            test.equal([1, 2, 3].toString(), arr.toString(), 'got the values from the branch');
-            test.done();
-        });
+	test.expect(1);
+	q([1, 2, 3])
+		.branch('nextOne')
+		.on('close', function() {
+			process.nextTick(function() { q('nextOne').close(); });
+		});
+	q('nextOne')
+		.toArray(function(arr) {
+			test.equal([1, 2, 3].toString(), arr.toString(), 'got the values from the branch');
+			test.done();
+		});
 };
 
 exports.referenceBranch = function(test) {
-    test.expect(1);
-    var anonNonClosingQueue = new q.Q();
-    q([1, 2, 3])
-        .branch(anonNonClosingQueue)
-        .on('close', function() {
-            process.nextTick(function() { anonNonClosingQueue.close(); });
-        });
-    anonNonClosingQueue
-        .toArray(function(arr) {
-            test.equal([1, 2, 3].toString(), arr.toString(), 'got the values into an anonymous queue');
-            test.done();
-        });
+	test.expect(1);
+	var anonNonClosingQueue = new q.Q();
+	q([1, 2, 3])
+		.branch(anonNonClosingQueue)
+		.on('close', function() {
+			process.nextTick(function() { anonNonClosingQueue.close(); });
+		});
+	anonNonClosingQueue
+		.toArray(function(arr) {
+			test.equal([1, 2, 3].toString(), arr.toString(), 'got the values into an anonymous queue');
+			test.done();
+		});
 };
 
 exports.arrayBranch = function(test) {
-    test.expect(2);
-    q([1, 2, 3])
-        .branch(['queue1', q('queue2')])
-        .on('close', function() {
-            process.nextTick(function() {
-                q('queue1').close();
-                q('queue2').close();
-            });
-        });
-    var finishedQueues = 0;
-    q('queue1')
-        .toArray(function(arr) {
-            test.equal([1, 2, 3].toString(), arr.toString(), 'first queue got the values');
-            finishedQueues++;
-            if(finishedQueues == 2) test.done();
-        });
-    q('queue2')
-        .toArray(function(arr) {
-            test.equal([1, 2, 3].toString(), arr.toString(), 'second queue got the values');
-            finishedQueues++;
-            if(finishedQueues == 2) test.done();
-        });
+	test.expect(2);
+	q([1, 2, 3])
+		.branch(['queue1', q('queue2')])
+		.on('close', function() {
+			process.nextTick(function() {
+				q('queue1').close();
+				q('queue2').close();
+			});
+		});
+	var finishedQueues = 0;
+	q('queue1')
+		.toArray(function(arr) {
+			test.equal([1, 2, 3].toString(), arr.toString(), 'first queue got the values');
+			finishedQueues++;
+			if(finishedQueues == 2) test.done();
+		});
+	q('queue2')
+		.toArray(function(arr) {
+			test.equal([1, 2, 3].toString(), arr.toString(), 'second queue got the values');
+			finishedQueues++;
+			if(finishedQueues == 2) test.done();
+		});
 };

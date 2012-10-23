@@ -543,3 +543,17 @@ exports.arrayBranch = function(test) {
 			if(finishedQueues == 2) test.done();
 		});
 };
+
+exports.defaultQ = function(test) {
+    test.expect(1);
+    var testQ = q.ns();
+    function fakeConstructor(nameOrArray, qType) {
+        this.foo = function() {
+            return 'foo';
+        };
+        return this;
+    }
+    testQ.defaultQ = fakeConstructor;
+    test.equal(testQ('test').foo(), 'foo', 'used the fake constructor');
+    test.done();
+};

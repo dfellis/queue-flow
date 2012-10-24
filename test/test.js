@@ -1,5 +1,7 @@
-var q = require('../lib/queue-flow');
 var fs = require('fs');
+var jscoverage = require('jscoverage');
+var require = jscoverage.require(module);
+var q = require('../lib/queue-flow', true);
 
 exports.toArray = function(test) {
 	test.expect(1);
@@ -545,15 +547,40 @@ exports.arrayBranch = function(test) {
 };
 
 exports.defaultQ = function(test) {
-    test.expect(1);
-    var testQ = q.ns();
-    function fakeConstructor(nameOrArray, qType) {
-        this.foo = function() {
-            return 'foo';
-        };
-        return this;
-    }
-    testQ.defaultQ = fakeConstructor;
-    test.equal(testQ('test').foo(), 'foo', 'used the fake constructor');
-    test.done();
+	test.expect(1);
+	var testQ = q.ns();
+	function fakeConstructor(nameOrArray, qType) {
+		this.foo = function() {
+			return 'foo';
+		};
+		return this;
+	}
+	testQ.defaultQ = fakeConstructor;
+	test.equal(testQ('test').foo(), 'foo', 'used the fake constructor');
+	test.done();
+};
+
+exports.jscoverage = function(test) {
+	test.expect(1);
+	var file, tmp, source, total, touched;
+	for (var i in _$jscoverage) {
+		test.ok(true, 'only one file tested by jscoverage');
+		file = i;
+		tmp = _$jscoverage[i];
+		source = _$jscoverage[i].source;
+		total = touched = 0;
+		for (var n=0,len = tmp.length; n < len ; n++){
+			if (tmp[n] !== undefined) {
+			    total ++ ;
+				if (tmp[n] > 0) {
+					touched ++;
+				} else {
+					console.log(n + "\t:" + source[n-1]);
+				}
+			}
+		}
+		// test.equal(total, touched, 'All lines of code touched by test suite');
+		// Goal is to uncomment the line above
+	}
+	test.done();
 };

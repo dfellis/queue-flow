@@ -1,27 +1,28 @@
 {
 	"name": "queue-flow",
 	"description": "Chainable logic built on named (or not) queues for Javascript and Node.js",
-    "keywords": ["queue-flow", "queueflow", "flow", "queues", "async"],
+	"keywords": ["queue-flow", "queueflow", "flow", "queues", "async"],
 	"homepage": "https://dfellis.github.com/queue-flow",
 	"author": "David Ellis",
 	"version": "0.5.20",
-    "bugs": "https://github.com/dfellis/queue-flow/issues",
-    "repository": {
-        "type": "git",
-        "url": "git://github.com:dfellis/queue-flow.git"
-    },
+	"bugs": "https://github.com/dfellis/queue-flow/issues",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com:dfellis/queue-flow.git"
+	},
 	"main": "./lib/queue-flow",
 	"dependencies": {},
 	"devDependencies": {
 		"nodeunit": "*",
 		"docco": "*",
-		"uglify-js": "*"
+		"uglify-js": "*",
+		"jscoverage": "https://github.com/dfellis/node-jscoverage/tarball/master"
 	},
 	"engines": {
 		"node": ">=0.6"
 	},
 	"scripts": {
-        "prepublish": "./prepublish.sh",
+		"prepublish": "./prepublish.sh",
 		"test": "nodeunit ./test/test.js"
 	}
 }

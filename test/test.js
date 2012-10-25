@@ -426,6 +426,35 @@ exports.exec = function(test) {
 		});
 };
 
+exports.execSyncAsync = function(test) {
+	test.expect(4);
+	q([function(val) {
+		test.ok(val, 'got the bool as expected');
+	}]).execSync([true]);
+	q([function(arg) {
+		throw arg;
+	}]).execSync(['error'], 'syncError');
+	q('syncError')
+		.each(function(errArr) {
+			test.equal(errArr[0], 'error', 'caught the thrown error properly');
+		});
+	q([function(val, callback) {
+		callback(null, !val);
+	}]).execAsync([false]).each(function(val) {
+		test.ok(val, 'the bool was properly inverted and passed along');
+		q('asyncExec').push(function(arg, callback) {
+			callback(arg);
+		});
+	});
+	q('asyncExec')
+		.execAsync(['error'], 'asyncError');
+	q('asyncError')
+		.each(function(errArr) {
+			test.equal(errArr[0], 'error', 'intercepted error from async function');
+			test.done();
+		});
+};
+
 exports.eachAsync = function(test) {
 	test.expect(2);
 	q([1])

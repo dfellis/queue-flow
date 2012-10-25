@@ -4,7 +4,7 @@
 	"keywords": ["queue-flow", "queueflow", "flow", "queues", "async"],
 	"homepage": "https://dfellis.github.com/queue-flow",
 	"author": "David Ellis",
-	"version": "0.5.21",
+	"version": "0.5.22",
 	"bugs": "https://github.com/dfellis/queue-flow/issues",
 	"repository": {
 		"type": "git",

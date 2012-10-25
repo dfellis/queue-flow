@@ -560,6 +560,13 @@ exports.defaultQ = function(test) {
 	test.done();
 };
 
+exports.emptyAnonymousQ = function(test) {
+	test.expect(1);
+	var emptyAnonymousQ = q();
+	test.ok(emptyAnonymousQ instanceof q.Q, 'returned a proper Q instance');
+	test.done();
+};
+
 exports.jscoverage = function(test) {
 	test.expect(1);
 	var file, tmp, source, total, touched;

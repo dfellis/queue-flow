@@ -16,7 +16,7 @@
 		"nodeunit": "*",
 		"docco": "*",
 		"uglify-js": "*",
-		"jscoverage": "https://github.com/dfellis/node-jscoverage/tarball/master"
+		"jscoverage": ">=0.2.5"
 	},
 	"engines": {
 		"node": ">=0.6"

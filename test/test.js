@@ -251,6 +251,24 @@ exports.everySomeAnonQueue = function(test) {
 		});
 };
 
+exports.everySomeClosedQueue = function(test) {
+	test.expect(2);
+	q([1, 2, 3])
+		.every(function(val) {
+			return val/1 == val;
+		}, function(result) {
+			test.ok(result, 'all values were numbers');
+			q('asyncClosingQueue').push(1, 'not a number', 3).close();
+		});
+	q('asyncClosingQueue')
+		.every(function(val, callback) {
+			callback(val/1 == val);
+		}, function(result) {
+			test.ok(!result, 'some value was not a number!');
+			test.done();
+		});
+};
+
 exports.flattenAndNode = function(test) {
 	test.expect(1);
 	q(['.'])

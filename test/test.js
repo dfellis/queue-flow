@@ -291,6 +291,16 @@ exports.flattenAndNode = function(test) {
 		});
 };
 
+exports.flattenDepth = function(test) {
+	test.expect(1);
+	q([1, [2, [3, [4, [5]]]]])
+		.flatten(2)
+		.toArray(function(val) {
+			test.equal([1, 2, 3, [4, [5]]].toString(), val.toString(), 'flattened input only to a specified depth');
+			test.done();
+		});
+};
+
 exports.namespaces = function(test) {
 	test.expect(1);
 	var foo = q.ns();

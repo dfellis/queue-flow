@@ -498,7 +498,7 @@ exports.asyncEachMapReduce = function(test) {
 };
 
 exports.wait = function(test) {
-	test.expect(4);
+	test.expect(6);
 	var startTime = new Date().getTime();
 	q([1, 2, 3, 4, 5])
 		.wait(50)
@@ -517,6 +517,17 @@ exports.wait = function(test) {
 			test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'kept the correct order (good test of queue correctness)');
 			var endTime = new Date().getTime();
 			test.ok(endTime - startTime > 1000, 'total delay time again reached');
+			startTime = endTime;
+			q('lastOne').concat(arr).close();
+		});
+	q('lastOne')
+		.wait(function(val, callback) {
+			callback(val*100);
+		})
+		.toArray(function(arr) {
+			test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'kept the order (again)');
+			var endTime = new Date().getTime();
+			test.ok(endTime - startTime > 1000, 'total delay time reached');
 			test.done();
 		});
 };

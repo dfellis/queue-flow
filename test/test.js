@@ -586,6 +586,38 @@ exports.arrayBranch = function(test) {
 		});
 };
 
+exports.asyncBranch = function(test) {
+	var runs = 0, total = 4;
+	test.expect(total);
+	q([1, 2, 3])
+		.branch(function(val, callback) {
+			if(val/2 == Math.floor(val/2)) {
+				callback(['number', 'even']);
+			} else if(val/1 == val) {
+				callback('number');
+			} else {
+				callback('BranchError');
+			}
+		});
+		q('number')
+			.each(function(val) {
+				test.ok(val/1 == val, 'a number was passed in here');
+				runs++;
+				if(runs == total) test.done();
+			});
+		q('even')
+			.each(function(val) {
+				test.ok(val/2 == Math.floor(val/2), 'an even number was passed in here');
+				runs++;
+				if(runs == total) test.done();
+			});
+		q('BranchError')
+			.each(function(val) {
+				test.ok(false, 'nothing should come into this queue');
+				test.done();
+			});
+};
+
 exports.defaultQ = function(test) {
 	test.expect(1);
 	var testQ = q.ns();

@@ -301,6 +301,29 @@ exports.flattenDepth = function(test) {
 		});
 };
 
+exports.nodeAlternateErrorHandlers = function(test) {
+	test.expect(2);
+	q([new Error('this is an error!'), 'never going to run'])
+		.node(function(arg) {
+			if(arg instanceof Error) throw arg;
+			return arg;
+		}, function(error) {
+			test.ok(error instanceof Error, 'the error was passed to the error callback');
+			q('truthyErrorHandler').push(error);
+		});
+	q('truthyErrorHandler')
+		.each(function(val) {
+			test.ok(true, 'the error is now here');
+			test.done();
+		}).node(function(arg) {
+			if(arg instanceof Error) throw arg;
+			return arg;
+		}, true)
+		.each(function(val) {
+			test.ok(false, 'never going to run');
+		});
+};
+
 exports.namespaces = function(test) {
 	test.expect(1);
 	var foo = q.ns();
@@ -690,7 +713,7 @@ exports.processNextTickPatch = function(test) {
 };
 
 exports.jscoverage = function(test) {
-	test.expect(1);
+	test.expect(2);
 	var file, tmp, source, total, touched;
 	for (var i in _$jscoverage) {
 		test.ok(true, 'only one file tested by jscoverage');
@@ -708,8 +731,7 @@ exports.jscoverage = function(test) {
 				}
 			}
 		}
-		// test.equal(total, touched, 'All lines of code touched by test suite');
-		// Goal is to uncomment the line above
+		test.equal(total, touched, 'All lines of code touched by test suite');
 	}
 	test.done();
 };

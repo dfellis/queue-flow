@@ -468,7 +468,7 @@ exports.exec = function(test) {
 		if(count == total) test.done();
 		process.nextTick(callback);
 	}, 'notAFunction'])
-		.exec(['Hello, World!'], 'execError');
+		.exec('Hello, World!', 'execError');
 	q('execError')
 		.each(function(errResArgs) {
 			test.equal(errResArgs[2], 'notAFunction', 'The string was thrown into the error queue');
@@ -502,6 +502,33 @@ exports.execSyncAsync = function(test) {
 	q('asyncError')
 		.each(function(errArr) {
 			test.equal(errArr[0], 'error', 'intercepted error from async function');
+			test.done();
+		});
+};
+
+exports.execArgsMethods = function(test) {
+	test.expect(3);
+	q([function(val) {
+		test.ok(val, 'got true because this is a function as expected');
+		q('execArgsContinue').push(function(val, callback) {
+			test.ok(val, 'got true because this is an async function');
+			q('execArgsFinal').push(function(val) {
+				return 'I will never run';
+			});
+			callback();
+		});
+	}]).exec(function(func) {
+		return func instanceof Function;
+	});
+	q('execArgsContinue')
+		.exec(function(func, callback) {
+			callback(q.isAsync(func, 2));
+		});
+	q('execArgsFinal')
+		.exec(function(func) {
+			throw func;
+		}, function(error) {
+			test.ok(error instanceof Function, 'received the thrown function properly');
 			test.done();
 		});
 };

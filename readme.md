@@ -1,4 +1,6 @@
-# queue-flow [![Build Status](https://secure.travis-ci.org/dfellis/queue-flow.png)](http://travis-ci.org/dfellis/queue-flow)
+# [![queue-flow](http://dfellis.github.com/queue-flow/images/queue-flow-logo.svg)](http://dfellis.github.com/queue-flow)
+
+[![Build Status](https://secure.travis-ci.org/dfellis/queue-flow.png)](http://travis-ci.org/dfellis/queue-flow)
 
 ## Quick install instructions
 

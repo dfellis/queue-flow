@@ -23,6 +23,12 @@ img {
     padding: 10px;
 }
 
+body > img {
+    display: block;
+    float: none;
+    margin: 0 auto 0 auto;
+}
+
 .wrapper {
   width: 640px;
   margin: 0 auto 0 200px;
@@ -40,7 +46,7 @@ img {
 .sidebar {
     position: fixed;
     left: 0px;
-    top: 100px;
+    top: 300px;
     width: 175px;
     background: #DEDEDE;
     -webkit-border-radius: 0px 8px 8px 0px;

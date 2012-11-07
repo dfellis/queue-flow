@@ -50,7 +50,7 @@ q('linearize')
 		return item;
 	})
 	// And then puts it back into the linearize queue
-	.chain('linearize');
+	.branch('linearize');
 
 // Actual installation/"processing" would occur here. Just log which
 // items are entering when

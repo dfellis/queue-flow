@@ -287,7 +287,7 @@ the <code>out</code> value.</p>             </td>             <td class="code"> 
     <span class="kd">var</span> <span class="nx">out</span> <span class="o">=</span> <span class="nx">initial</span><span class="p">;</span>
     <span class="kd">var</span> <span class="nx">outQueue</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
     <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">last</span><span class="p">)</span> <span class="nx">outQueue</span> <span class="o">=</span> <span class="k">new</span> <span class="k">this</span><span class="p">.</span><span class="nx">qType</span><span class="p">();</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">setHandler</span><span class="p">((</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setHandler</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span><span class="p">(</span><span class="o">!!</span><span class="nx">last</span> <span class="o">&amp;&amp;</span> <span class="nx">last</span> <span class="k">instanceof</span> <span class="nb">Function</span><span class="p">)</span> <span class="nx">last</span><span class="p">(</span><span class="nx">out</span><span class="p">);</span>
         <span class="k">if</span><span class="p">(</span><span class="o">!!</span><span class="nx">last</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span><span class="p">(</span><span class="nx">last</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="nx">q</span><span class="p">(</span><span class="nx">last</span><span class="p">).</span><span class="nx">push</span><span class="p">(</span><span class="nx">out</span><span class="p">);</span>
@@ -302,7 +302,7 @@ the <code>out</code> value.</p>             </td>             <td class="code"> 
           <span class="nx">next</span><span class="p">();</span>
         <span class="p">}</span>
       <span class="p">}</span>
-    <span class="p">}).</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">));</span>
+    <span class="p">}.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">));</span>
     <span class="k">return</span> <span class="nx">outQueue</span> <span class="o">||</span> <span class="k">this</span><span class="p">;</span>
   <span class="p">};</span>
   <span class="nx">Q</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reduceAsync</span> <span class="o">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">makeAsync</span><span class="p">(</span><span class="nx">Q</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reduce</span><span class="p">);</span>

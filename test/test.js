@@ -1,5 +1,6 @@
 var fs = require('fs');
 var jscoverage = require('jscoverage');
+var cr = require('complexity-report');
 var require = jscoverage.require(module);
 var q = require('../lib/queue-flow', true);
 
@@ -761,4 +762,10 @@ exports.jscoverage = function(test) {
 		test.equal(total, touched, 'All lines of code touched by test suite');
 	}
 	test.done();
+};
+
+exports.complexity = function(test) {
+    test.expect(1);
+    test.ok(70 <= cr.run(fs.readFileSync('./lib/queue-flow.js', 'utf8')).maintainability, 'queue-flow is not considered overly complex');
+    test.done();
 };

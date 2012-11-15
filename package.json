@@ -16,7 +16,8 @@
 		"nodeunit": "*",
 		"docco": "*",
 		"uglify-js": "*",
-		"jscoverage": ">=0.2.5"
+		"jscoverage": ">=0.2.5",
+        "complexity-report": "*"
 	},
 	"engines": {
 		"node": ">=0.6"

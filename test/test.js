@@ -395,7 +395,7 @@ exports.kill = function(test) {
 	q('toKill')
 		.branch('toAlsoKill');
 	q('toKill').kill();
-	test.equal(q.exists('toAlsoKill'), false, 'kills the subqueue, immediately');
+	test.equal(q.exists('toAlsoKill'), false, 'kills the branch, immediately');
 	test.done();
 };
 
@@ -718,6 +718,31 @@ exports.emptyAnonymousQ = function(test) {
 	test.done();
 };
 
+exports.subqueue = function(test) {
+	test.expect(2);
+	function syncSubQ(subQ) {
+		return subQ
+			.map(function() { return 'foo'; });
+	}
+	function asyncSubQ(subQ, callback) {
+		setTimeout(function() {
+			var out = subQ
+				.map(function() { return 'bar'; });
+			callback(out)
+		}, 50);
+	}
+	q([1])
+		.subqueue(syncSubQ)
+		.each(function(val) {
+			test.equal('foo', val, 'sync subqueue worked');
+		})
+		.subqueue(asyncSubQ)
+		.each(function(val) {
+			test.equal('bar', val, 'async subqueue worked');
+			test.done();
+		});
+};
+
 exports.processNextTickPatch = function(test) {
 	test.expect(2);
 	process.oldNextTick = process.nextTick;
@@ -751,7 +776,7 @@ exports.jscoverage = function(test) {
 		total = touched = 0;
 		for (var n=0,len = tmp.length; n < len ; n++){
 			if (tmp[n] !== undefined) {
-			    total ++ ;
+				total ++ ;
 				if (tmp[n] > 0) {
 					touched ++;
 				} else {
@@ -765,7 +790,7 @@ exports.jscoverage = function(test) {
 };
 
 exports.complexity = function(test) {
-    test.expect(1);
-    test.ok(70 <= cr.run(fs.readFileSync('./lib/queue-flow.js', 'utf8')).maintainability, 'queue-flow is not considered overly complex');
-    test.done();
+	test.expect(1);
+	test.ok(70 <= cr.run(fs.readFileSync('./lib/queue-flow.js', 'utf8')).maintainability, 'queue-flow is not considered overly complex');
+	test.done();
 };

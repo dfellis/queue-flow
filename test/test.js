@@ -743,6 +743,34 @@ exports.subqueue = function(test) {
 		});
 };
 
+exports.promise = function(test) {
+	test.expect(2);
+	function simplePromise(val) {
+		return {
+			then: function(resultFunc, errorFunc) {
+				if(val instanceof Error) {
+					setTimeout(errorFunc.bind(this, val), 50);
+				} else {
+					setTimeout(resultFunc.bind(this, val), 50);
+				}
+			}
+		};
+	}
+	q([1, new Error('hi')])
+		.promise(simplePromise, 'error')
+		.promise(simplePromise, q('error'))
+		.promise(simplePromise, function() {})
+		.promise(simplePromise)
+		.each(function(val) {
+			test.equal(val, 1, 'the valid value goes in');
+			test.done();
+		});
+	q('error')
+		.each(function(val) {
+			test.ok(val instanceof Error, 'the error went into the error queue');
+		});
+};
+
 exports.processNextTickPatch = function(test) {
 	test.expect(2);
 	process.oldNextTick = process.nextTick;

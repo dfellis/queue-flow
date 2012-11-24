@@ -1,7 +1,7 @@
 // This simple example shows off tree traversal with queue-flow, specifically
 // a dependency graph, and a processing queue for "working" on each dependency
 // in a valid order (all dependencies of the item have already been processed)
-var q = require('../lib/queue-flow');
+if(typeof require != 'undefined') var q = require('../lib/queue-flow');
 
 // Each item, with an array of items that mus be 'processed' before said item
 // can be processed

@@ -777,7 +777,7 @@ exports.processNextTickPatch = function(test) {
 	process.nextTick = undefined;
 	var q2 = require('../lib/queue-flow', true);
 	test.ok(q2() instanceof q2.Q, 'queue-flow still starts up without process.nextTick');
-	test.ok(process.nextTick === setTimeout, 'setTimeout is properly substituted in for process.nextTick');
+	test.ok(/setTimeout/.test(process.nextTick.toString()), 'setTimeout is properly substituted in for process.nextTick');
 	// jscoverage can't handle two different requires of the same module where the module goes through a
 	// different initialization path. The following is a hack to get the coverage report to remove the
 	// clearly-covered lines of code. (I don't expect this code to change much, if ever, so this should be fine)

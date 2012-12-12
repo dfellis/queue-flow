@@ -303,20 +303,38 @@ exports.flattenDepth = function(test) {
 };
 
 exports.nodeAlternateErrorHandlers = function(test) {
-	test.expect(2);
+	test.expect(4);
+    var onError = q();
 	q([new Error('this is an error!'), 'never going to run'])
 		.node(function(arg) {
 			if(arg instanceof Error) throw arg;
 			return arg;
 		}, function(error) {
 			test.ok(error instanceof Error, 'the error was passed to the error callback');
-			q('truthyErrorHandler').push(error);
+			q('unnamedErrorHandler').push(error);
 		});
+    q('unnamedErrorHandler')
+        .each(function(val) {
+            test.ok(true, 'the error is in the unnamed error handler');
+        })
+        .node(function(arg) {
+            if(arg instanceof Error) throw arg;
+            return arg;
+        }, onError)
+        .each(function(val) {
+            test.ok(false, 'never going to run');
+        });
+    onError
+        .each(function(error) {
+            test.ok(true, 'error is in the onError queue');
+            q('truthyErrorHandler').push(error);
+        });
 	q('truthyErrorHandler')
 		.each(function(val) {
 			test.ok(true, 'the error is now here');
 			test.done();
-		}).node(function(arg) {
+		})
+        .node(function(arg) {
 			if(arg instanceof Error) throw arg;
 			return arg;
 		}, true)

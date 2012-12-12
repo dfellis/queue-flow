@@ -454,6 +454,10 @@ callback function with significant error logic, depending on what value is passe
         <span class="nx">next</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
           <span class="nx">q</span><span class="p">(</span><span class="nx">onError</span><span class="p">).</span><span class="nx">push</span><span class="p">([</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">value</span><span class="p">]);</span>
         <span class="p">});</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="nx">onError</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Assume a queue-flow constructed object</span>
+                <span class="nx">next</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="nx">onError</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">error</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">value</span><span class="p">]);</span>
+                <span class="p">});</span>
       <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="c1">// &#39;truthy&#39; value</span>
         <span class="k">this</span><span class="p">.</span><span class="nx">setHandler</span><span class="p">(</span><span class="nx">shortCircuit</span><span class="p">);</span>
       <span class="p">}</span>

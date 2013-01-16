@@ -124,7 +124,7 @@ q('doSomethingElse')
     ...
 ```
 
-``queue-flow`` makes async and sync data processing code easy to read like ``Fibers`` (it doesn't look like fibers code, but it is easy to follow like it) while not altering the Javascript language itself like *async*, giving you the best of both worlds, along with some other advantages:
+``queue-flow`` makes async and sync data processing code easy to read like ``Fibers`` (it doesn't look like fibers code, but it is easy to follow like it) while not altering the Javascript language itself like ``async``, giving you the best of both worlds, along with some other advantages:
 
 * queues in ``queue-flow`` are simply temporary storage for the consuming method "verb" you use. These "verbs" create new, anonymous queues so they can be chained together easily for a terse, easy-to-understand syntax.
 * Because there are anonymous queues in between, as one "verb" completes its task on one item to process, it can pass that along to the next "verb" in the chain to process while it starts to tackle the next item. If most of your "verbs" are dealing with I/O (database, file system, network connection, etc), then you very quickly will keep all of the other processes in your "pipeline" saturated, while still guaranteeing First-In-First-Out.
@@ -137,7 +137,7 @@ Want to learn more? [Check out the tutorial for ``queue-flow``](http://dfellis.g
 
 ## License (MIT)
 
-Copyright (C) 2012 by David Ellis
+Copyright (C) 2012-2013 by David Ellis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

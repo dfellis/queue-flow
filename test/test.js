@@ -789,6 +789,18 @@ exports.promise = function(test) {
 		});
 };
 
+exports.drain = function(test) {
+    test.expect(2);
+    var drainOutput = q([1])
+        .each(function(value) {
+            test.expect(1, value, 'the values are being passed on to the drain method');
+        })
+        .on('close', function() {
+            test.done();
+        }).drain();
+    test.equal(undefined, drainOutput, 'drain returns nothing');
+};
+
 exports.processNextTickPatch = function(test) {
 	test.expect(2);
 	process.oldNextTick = process.nextTick;

@@ -17,13 +17,14 @@
 		"docco": "*",
 		"uglify-js": "*",
 		"jscoverage": "0.2.5",
-        "complexity-report": "*"
+        "complexity-report": "*",
+        "jshint": "*"
 	},
 	"engines": {
 		"node": ">=0.6"
 	},
 	"scripts": {
 		"realpublish": "./prepublish.sh && npm publish",
-		"test": "nodeunit ./test/test.js"
+		"test": "jshint ./lib/queue-flow.js && nodeunit ./test/test.js"
 	}
 }

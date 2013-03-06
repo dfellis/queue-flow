@@ -18,7 +18,8 @@
 		"uglify-js": "*",
 		"jscoverage": "0.2.5",
         "complexity-report": "*",
-        "jshint": "*"
+        "jshint": "*",
+        "tape": "*"
 	},
 	"engines": {
 		"node": ">=0.6"
@@ -26,5 +27,16 @@
 	"scripts": {
 		"realpublish": "./prepublish.sh && npm publish",
 		"test": "jshint ./lib/queue-flow.js && nodeunit ./test/test.js"
-	}
+	},
+    "testling": {
+        "files": "test/test-browser.js",
+        "browsers": {
+            "ie": [ 9, 10 ],
+            "firefox": [ 14, 15, 16, 17, "nightly" ],
+            "chrome": [ 20, 21, 22, 23, "canary" ],
+            "safari": [ 6.0 ],
+            "opera": [ 11.0, 11.6, 12.0, "next" ],
+            "iphone": [ 6 ]
+        }
+    }
 }

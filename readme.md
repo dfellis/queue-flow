@@ -2,6 +2,8 @@
 
 [![Build Status](https://secure.travis-ci.org/dfellis/queue-flow.png)](http://travis-ci.org/dfellis/queue-flow)
 
+[![browser support](http://ci.testling.com/dfellis/queue-flow.png)](http://ci.testling.com/dfellis/queue-flow)
+
 ## Quick install instructions
 
 For Node.js

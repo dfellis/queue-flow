@@ -4,5 +4,5 @@ var tests = require('./test');
 tests.getQueueFlow(q);
 
 for(var key in tests) {
-    if(key !== 'getQueueFlow') tape(key, tests[key]);
+    if(key !== 'getQueueFlow' && key !== 'flattenAndNode' && key !== 'complexity') tape(key, tests[key]);
 }

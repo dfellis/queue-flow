@@ -886,6 +886,8 @@ exports.manuallyDropQueue = function(test) {
 exports.complexity = function(test) {
     bootstrap(test);
 	test.expect(1);
-	test.ok(70 <= cr.run(fs.readFileSync('./lib/queue-flow.js', 'utf8')).maintainability, 'queue-flow is not considered overly complex');
-	test.done();
+    fs.readFile('./lib/queue-flow.js', function(err, data) {
+        test.ok(70 <= cr.run(data.toString('utf8')).maintainability, 'queue-flow is not considred overly complex');
+	    test.done();
+    });
 };

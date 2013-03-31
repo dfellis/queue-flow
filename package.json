@@ -11,12 +11,15 @@
 		"url": "git://github.com:dfellis/queue-flow.git"
 	},
 	"main": "./lib/queue-flow",
-	"dependencies": {},
+	"dependencies": {
+        "is-async": "0.0.2"
+    },
 	"devDependencies": {
 		"nodeunit": "*",
 		"docco": "*",
+        "browserify": "*",
 		"uglify-js": "*",
-		"jscoverage": "0.2.5",
+		"jscoverage": "*",
         "complexity-report": "*",
         "jshint": "*",
         "tape": "*"

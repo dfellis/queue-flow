@@ -1,10 +1,17 @@
 var fs = require('fs');
 var jscoverage = require('jscoverage');
 var cr = require('complexity-report');
-var require = jscoverage.require(module);
-var q = require('../lib/queue-flow', true);
+var isAsync = require('is-async');
+jscoverage.enableCoverage(true);
+var q = jscoverage.require(module, '../lib/queue-flow');
+
+function bootstrap(test) {
+    test.expect = test.expect || test.plan;
+    test.done = test.done || test.end;
+}
 
 exports.toArray = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3])
 		.toArray(function(result) {
@@ -14,6 +21,7 @@ exports.toArray = function(test) {
 };
 
 exports.toArrayNamedQueue = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3]).toArray('testToArrayNamedQueue');
 	q('testToArrayNamedQueue')
@@ -24,6 +32,7 @@ exports.toArrayNamedQueue = function(test) {
 };
 
 exports.toArrayAnonQueue = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3])
 		.toArray()
@@ -34,6 +43,7 @@ exports.toArrayAnonQueue = function(test) {
 };
 
 exports.as = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3]).as('test1');
 	q('test1').close().toArray(function(result) {
@@ -43,6 +53,7 @@ exports.as = function(test) {
 };
 
 exports.push = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q('test2').push(1, 2, 3).close().toArray(function(result) {
 		test.equal([1, 2, 3].toString(), result.toString(), 'named queue with elements pushed after-the-fact properly referenceable');
@@ -51,6 +62,7 @@ exports.push = function(test) {
 };
 
 exports.map = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3]).map(function(value) {
 		return value*2;
@@ -61,6 +73,7 @@ exports.map = function(test) {
 };
 
 exports.reduce = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3])
 		.reduce(function(prev, curr) {
@@ -72,6 +85,7 @@ exports.reduce = function(test) {
 };
 
 exports.reduceNamedQueue = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3])
 		.reduce(function(prev, curr) {
@@ -85,6 +99,7 @@ exports.reduceNamedQueue = function(test) {
 };
 
 exports.reduceAnonQueue = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3])
 		.reduce(function(prev, curr) {
@@ -97,6 +112,7 @@ exports.reduceAnonQueue = function(test) {
 };
 
 exports.filter = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 'skip a few', 99, 100])
 		.filter(function(value) {
@@ -109,6 +125,7 @@ exports.filter = function(test) {
 };
 
 exports.on = function(test) {
+    bootstrap(test);
 	test.expect(5);
 	q([1, 2, 3])
 		.on('close', function() {
@@ -132,6 +149,7 @@ exports.on = function(test) {
 };
 
 exports.branch = function(test) {
+    bootstrap(test);
 	test.expect(3);
 	q([1, 2, 'skip a few', 99, 100])
 		.branch(function(value) {
@@ -170,6 +188,7 @@ exports.branch = function(test) {
 };
 
 exports.latency = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	var currentMapVal = Infinity;
 	var reducedLatency = false;
@@ -190,6 +209,7 @@ exports.latency = function(test) {
 };
 
 exports.async = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3])
 		.map(function(val, callback) {
@@ -206,6 +226,7 @@ exports.async = function(test) {
 };
 
 exports.everySome = function(test) {
+    bootstrap(test);
 	test.expect(2);
 	var count = 0;
 	q([1, 2, 'buckle my shoe'])
@@ -228,6 +249,7 @@ exports.everySome = function(test) {
 exports.everySomeNamedQueue = function(test) {
 	// No need to test both branches because they use the same underlying method
 	// and previous test confirmed the logic is sound for both.
+    bootstrap(test);
 	test.expect(1);
 	q([5, 6, 'grab some sticks'])
 		.every(function(value) {
@@ -241,6 +263,7 @@ exports.everySomeNamedQueue = function(test) {
 };
 
 exports.everySomeAnonQueue = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([7, 8, 'open the gate'])
 		.some(function(value) {
@@ -253,6 +276,7 @@ exports.everySomeAnonQueue = function(test) {
 };
 
 exports.everySomeClosedQueue = function(test) {
+    bootstrap(test);
 	test.expect(2);
 	q([1, 2, 3])
 		.every(function(val) {
@@ -271,6 +295,7 @@ exports.everySomeClosedQueue = function(test) {
 };
 
 exports.flattenAndNode = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q(['.'])
 		.node(fs.readdir, 'error')
@@ -293,6 +318,7 @@ exports.flattenAndNode = function(test) {
 };
 
 exports.flattenDepth = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, [2, [3, [4, [5]]]]])
 		.flatten(2)
@@ -303,6 +329,7 @@ exports.flattenDepth = function(test) {
 };
 
 exports.nodeAlternateErrorHandlers = function(test) {
+    bootstrap(test);
 	test.expect(4);
     var onError = q();
 	q([new Error('this is an error!'), 'never going to run'])
@@ -344,6 +371,7 @@ exports.nodeAlternateErrorHandlers = function(test) {
 };
 
 exports.namespaces = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	var foo = q.ns();
 	var bar = q.ns();
@@ -353,6 +381,7 @@ exports.namespaces = function(test) {
 };
 
 exports.each = function(test) {
+    bootstrap(test);
 	test.expect(5);
 	var currVal = 0;
 	q([1, 2, 3])
@@ -368,6 +397,7 @@ exports.each = function(test) {
 };
 
 exports.tuple = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	test.equal(q.tuple({
 		a: 'b', c: 'd', e: 'f', g: 'h', i: 'j', k: 'l', m: 'n', o: 'p', q: 'r', s: 't', u: 'v', w: 'x', y: 'z'
@@ -376,6 +406,7 @@ exports.tuple = function(test) {
 };
 
 exports.syncNode = function(test) {
+    bootstrap(test);
 	test.expect(3);
 	q([['foo', 'bar']])
 		.node(function(foo, bar) {
@@ -391,6 +422,7 @@ exports.syncNode = function(test) {
 };
 
 exports.exists = function(test) {
+    bootstrap(test);
 	test.expect(3);
 	q('exists');
 	test.equal(q.exists('exists'), true, 'existing queue exists!');
@@ -407,6 +439,7 @@ exports.exists = function(test) {
 };
 
 exports.kill = function(test) {
+    bootstrap(test);
 	test.expect(2);
 	q('toKill').kill();
 	test.equal(q.exists('toKill'), false, 'kills the queue, immediately');
@@ -418,6 +451,7 @@ exports.kill = function(test) {
 };
 
 exports.multiBranch = function(test) {
+    bootstrap(test);
 	var testCount = 0, testTotal = 6;
 	test.expect(testTotal);
 	function eachFuncBuilder(expectedVal, explanatoryText) {
@@ -449,6 +483,7 @@ exports.multiBranch = function(test) {
 };
 
 exports.sync = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	function syncFuncWithOptionalParam(val, opt) {
 		if(opt) return val / opt;
@@ -463,6 +498,7 @@ exports.sync = function(test) {
 };
 
 exports.asyncEventHandler = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3, 4, 5])
 		.on('pull', function(val, callback) {
@@ -475,6 +511,7 @@ exports.asyncEventHandler = function(test) {
 };
 
 exports.exec = function(test) {
+    bootstrap(test);
 	var count = 0, total = 3;
 	test.expect(total);
 	q([function(val) {
@@ -497,6 +534,7 @@ exports.exec = function(test) {
 };
 
 exports.execSyncAsync = function(test) {
+    bootstrap(test);
 	test.expect(4);
 	q([function(val) {
 		test.ok(val, 'got the bool as expected');
@@ -526,6 +564,7 @@ exports.execSyncAsync = function(test) {
 };
 
 exports.execArgsMethods = function(test) {
+    bootstrap(test);
 	test.expect(3);
 	q([function(val) {
 		test.ok(val, 'got true because this is a function as expected');
@@ -541,7 +580,7 @@ exports.execArgsMethods = function(test) {
 	});
 	q('execArgsContinue')
 		.exec(function(func, callback) {
-			callback(q.isAsync(func, 2));
+			callback(isAsync(func, 2));
 		});
 	q('execArgsFinal')
 		.exec(function(func) {
@@ -553,6 +592,7 @@ exports.execArgsMethods = function(test) {
 };
 
 exports.eachAsync = function(test) {
+    bootstrap(test);
 	test.expect(2);
 	q([1])
 		.each(function(val, next) {
@@ -566,6 +606,7 @@ exports.eachAsync = function(test) {
 };
 
 exports.asyncMapReduce = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([0, 1, 2, 3, 4, 5])
 		.map(function(val, cb) {
@@ -580,6 +621,7 @@ exports.asyncMapReduce = function(test) {
 };
 
 exports.asyncEachMapReduce = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([0, 1, 2, 3, 4, 5])
 		.each(function(){})
@@ -595,6 +637,7 @@ exports.asyncEachMapReduce = function(test) {
 };
 
 exports.wait = function(test) {
+    bootstrap(test);
 	test.expect(6);
 	var startTime = new Date().getTime();
 	q([1, 2, 3, 4, 5])
@@ -630,6 +673,7 @@ exports.wait = function(test) {
 };
 
 exports.constantBranch = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	q([1, 2, 3])
 		.branch('nextOne')
@@ -644,6 +688,7 @@ exports.constantBranch = function(test) {
 };
 
 exports.referenceBranch = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	var anonNonClosingQueue = new q.Q();
 	q([1, 2, 3])
@@ -659,6 +704,7 @@ exports.referenceBranch = function(test) {
 };
 
 exports.arrayBranch = function(test) {
+    bootstrap(test);
 	test.expect(2);
 	q([1, 2, 3])
 		.branch(['queue1', q('queue2')])
@@ -684,6 +730,7 @@ exports.arrayBranch = function(test) {
 };
 
 exports.asyncBranch = function(test) {
+    bootstrap(test);
 	var runs = 0, total = 4;
 	test.expect(total);
 	q([1, 2, 3])
@@ -716,6 +763,7 @@ exports.asyncBranch = function(test) {
 };
 
 exports.defaultQ = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	var testQ = q.ns();
 	function fakeConstructor(nameOrArray, qType) {
@@ -730,6 +778,7 @@ exports.defaultQ = function(test) {
 };
 
 exports.emptyAnonymousQ = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	var emptyAnonymousQ = q();
 	test.ok(emptyAnonymousQ instanceof q.Q, 'returned a proper Q instance');
@@ -737,6 +786,7 @@ exports.emptyAnonymousQ = function(test) {
 };
 
 exports.subqueue = function(test) {
+    bootstrap(test);
 	test.expect(2);
 	function syncSubQ(subQ) {
 		return subQ
@@ -762,6 +812,7 @@ exports.subqueue = function(test) {
 };
 
 exports.promise = function(test) {
+    bootstrap(test);
 	test.expect(2);
 	function simplePromise(val) {
 		return {
@@ -790,6 +841,7 @@ exports.promise = function(test) {
 };
 
 exports.drain = function(test) {
+    bootstrap(test);
     test.expect(2);
     var drainOutput = q([1])
         .each(function(value) {
@@ -801,53 +853,51 @@ exports.drain = function(test) {
     test.equal(undefined, drainOutput, 'drain returns nothing');
 };
 
-exports.processNextTickPatch = function(test) {
-	test.expect(2);
-	process.oldNextTick = process.nextTick;
-	process.nextTick = undefined;
-	var q2 = require('../lib/queue-flow', true);
-	test.ok(q2() instanceof q2.Q, 'queue-flow still starts up without process.nextTick');
-	test.ok(/setTimeout/.test(process.nextTick.toString()), 'setTimeout is properly substituted in for process.nextTick');
-	// jscoverage can't handle two different requires of the same module where the module goes through a
-	// different initialization path. The following is a hack to get the coverage report to remove the
-	// clearly-covered lines of code. (I don't expect this code to change much, if ever, so this should be fine)
-	for(var i in _$jscoverage) {
-		source = _$jscoverage[i].source;
-		for(var j = 0; j < _$jscoverage[i].length; j++) {
-			if(/process = process/.test(source[j-1])) _$jscoverage[i][j] = undefined;
-			if(/process\.nextTick = process\.nextTick/.test(source[j-1])) _$jscoverage[i][j] = undefined;
-		}
-	}
-	process.nextTick = process.oldNextTick;
-	process.oldNextTick = undefined;
-	test.done();
+exports.nodeShortCircuit = function(test) {
+    bootstrap(test);
+    test.expect(1);
+    q([1, 2, 3])
+        .node(function(val) { throw val; }, function(error) {
+            test.equal(error, 1, 'error function received the first value');
+            test.done();
+        })
+        .map(function(val) {
+            test.ok(false, 'this will never run');
+        });
 };
 
 exports.jscoverage = function(test) {
-	test.expect(2);
-	var file, tmp, source, total, touched;
-	for (var i in _$jscoverage) {
-		test.ok(true, 'only one file tested by jscoverage');
-		file = i;
-		tmp = _$jscoverage[i];
-		source = _$jscoverage[i].source;
-		total = touched = 0;
-		for (var n=0,len = tmp.length; n < len ; n++){
-			if (tmp[n] !== undefined) {
-				total ++ ;
-				if (tmp[n] > 0) {
-					touched ++;
-				} else {
-					console.log(n + "\t:" + source[n-1]);
-				}
-			}
-		}
-		test.equal(total, touched, 'All lines of code touched by test suite');
-	}
-	test.done();
+    bootstrap(test);
+	test.expect(1);
+    jscoverage.coverageDetail();
+    // Copied directly from jscoverage and edited, since getting at these values directly isn't possible
+    var file;
+    var tmp;
+    var total;
+    var touched;
+    var n, len;
+    if (typeof _$jscoverage === 'undefined') {
+        return;
+    }
+    for (var i in _$jscoverage) {
+        file = i;
+        tmp = _$jscoverage[i];
+        if (typeof tmp === 'function' || tmp.length === undefined) continue;
+        total = touched = 0;
+        for (n = 0, len = tmp.length; n < len; n++) {
+            if (tmp[n] !== undefined) {
+                total ++;
+                if (tmp[n] > 0)
+                    touched ++;
+            }
+        }
+        test.equal(total, touched, 'All lines of code exercised by the tests');
+    }
+    test.done();
 };
 
 exports.complexity = function(test) {
+    bootstrap(test);
 	test.expect(1);
 	test.ok(70 <= cr.run(fs.readFileSync('./lib/queue-flow.js', 'utf8')).maintainability, 'queue-flow is not considered overly complex');
 	test.done();

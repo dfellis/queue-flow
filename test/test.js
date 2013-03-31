@@ -1,9 +1,11 @@
 var fs = require('fs');
-var jscoverage = require('jscoverage');
 var cr = require('complexity-report');
 var isAsync = require('is-async');
-jscoverage.enableCoverage(true);
-var q = jscoverage.require(module, '../lib/queue-flow');
+var q;
+
+exports.getQueueFlow = function(qf) {
+    q = qf;
+};
 
 function bootstrap(test) {
     test.expect = test.expect || test.plan;
@@ -873,36 +875,6 @@ exports.manuallyDropQueue = function(test) {
     test.ok(q.exists('toDrop'), 'the queue exists right now');
     q.clearQueue('toDrop');
     test.ok(!q.exists('toDrop'), 'the queue was eliminated from the namespace');
-    test.done();
-};
-
-exports.jscoverage = function(test) {
-    bootstrap(test);
-	test.expect(1);
-    jscoverage.coverageDetail();
-    // Copied directly from jscoverage and edited, since getting at these values directly isn't possible
-    var file;
-    var tmp;
-    var total;
-    var touched;
-    var n, len;
-    if (typeof _$jscoverage === 'undefined') {
-        return;
-    }
-    for (var i in _$jscoverage) {
-        file = i;
-        tmp = _$jscoverage[i];
-        if (typeof tmp === 'function' || tmp.length === undefined) continue;
-        total = touched = 0;
-        for (n = 0, len = tmp.length; n < len; n++) {
-            if (tmp[n] !== undefined) {
-                total ++;
-                if (tmp[n] > 0)
-                    touched ++;
-            }
-        }
-        test.equal(total, touched, 'All lines of code exercised by the tests');
-    }
     test.done();
 };
 

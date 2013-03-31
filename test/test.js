@@ -866,6 +866,16 @@ exports.nodeShortCircuit = function(test) {
         });
 };
 
+exports.manuallyDropQueue = function(test) {
+    bootstrap(test);
+    test.expect(2);
+    q('toDrop');
+    test.ok(q.exists('toDrop'), 'the queue exists right now');
+    q.clearQueue('toDrop');
+    test.ok(!q.exists('toDrop'), 'the queue was eliminated from the namespace');
+    test.done();
+};
+
 exports.jscoverage = function(test) {
     bootstrap(test);
 	test.expect(1);

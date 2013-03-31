@@ -302,12 +302,17 @@ exports.flattenAndNode = function(test) {
 	q(['.'])
 		.node(fs.readdir, 'error')
 		.flatten()
-		.map(function(filename) {
-			return ['./' + filename, 'utf8'];
-		})
-		.node(fs.readFile)
+        .filter(function(path, next) {
+            fs.stat('./' + path, function(err, stat) {
+                next(stat.isFile());
+            });
+        })
+        .map(function(filename) {
+            return ['./' + filename];
+        })
+		.nodeAsync(fs.readFile)
 		.reduce(function(concat, fileData) {
-			return concat + fileData;
+			return concat + fileData.toString('utf8');
 		}, function(result) {
 			test.equal(typeof(result), 'string', 'all files concatenated properly');
 			test.done();

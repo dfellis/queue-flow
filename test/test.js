@@ -126,30 +126,6 @@ exports.filter = function(test) {
 		});
 };
 
-exports.on = function(test) {
-    bootstrap(test);
-	test.expect(5);
-	q([1, 2, 3])
-		.on('close', function() {
-			test.ok(true, 'close event fired');
-		})
-		.on('pull', function() {
-			test.ok(true, 'pull event fired');
-		})
-		.on('empty', function() {
-			test.ok(true, 'empty event fired');
-			test.done();
-		})
-		.toArray(function() { });
-	q([1, 2, 3])
-		.on('close', function() {
-			return false;
-		})
-		.toArray(function() {
-			test.ok(false, 'array method never executes final callback');
-		});
-};
-
 exports.branch = function(test) {
     bootstrap(test);
 	test.expect(3);
@@ -500,19 +476,6 @@ exports.sync = function(test) {
 		.mapSync(syncFuncWithOptionalParam)
 		.toArray(function(arr) {
 			test.equal([1, 2, 3, 4, 5].toString(), arr.toString(), 'mapSync did not pass a callback function');
-			test.done();
-		});
-};
-
-exports.asyncEventHandler = function(test) {
-    bootstrap(test);
-	test.expect(1);
-	q([1, 2, 3, 4, 5])
-		.on('pull', function(val, callback) {
-			setTimeout(callback.bind(this, val == 1), 25);
-		})
-		.each(function(val) {
-			test.equal(1, val, 'only the first value is allowed through, even if event handler is async');
 			test.done();
 		});
 };

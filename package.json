@@ -12,7 +12,8 @@
 	},
 	"main": "./lib/queue-flow",
 	"dependencies": {
-        "is-async": "0.0.2"
+        "is-async": "0.0.2",
+        "async-cancelable-events": "0.0.1"
     },
 	"devDependencies": {
 		"nodeunit": "*",

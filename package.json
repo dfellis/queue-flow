@@ -2,9 +2,9 @@
 	"name": "queue-flow",
 	"description": "Chainable logic built on named (or not) queues for Javascript and Node.js",
 	"keywords": ["queue-flow", "queueflow", "flow", "queues", "async"],
-	"homepage": "https://dfellis.github.com/queue-flow",
+	"homepage": "http://dfellis.github.com/queue-flow",
 	"author": "David Ellis",
-	"version": "0.6.2",
+	"version": "0.6.3",
 	"bugs": "https://github.com/dfellis/queue-flow/issues",
 	"repository": {
 		"type": "git",

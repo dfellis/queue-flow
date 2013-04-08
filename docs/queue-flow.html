@@ -96,15 +96,16 @@ or decides it&#39;s an unnamed queue and returns said queue.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span> q = <span class="function"><span class="keyword">function</span> <span class="title">q</span><span class="params">(nameOrArray, qType)</span> {</span>
+        qType = qType || q.defaultQ;
 		<span class="keyword">if</span>(<span class="keyword">typeof</span>(nameOrArray) == <span class="string">"string"</span>) {
-			<span class="keyword">if</span>(!namedQueues[nameOrArray] || !(namedQueues[nameOrArray] <span class="keyword">instanceof</span> q.defaultQ || namedQueues[nameOrArray] <span class="keyword">instanceof</span> qType)) {
-				namedQueues[nameOrArray] = <span class="keyword">new</span> Q(nameOrArray, qType || q.defaultQ, q);
+			<span class="keyword">if</span>(!namedQueues[nameOrArray]) {
+				namedQueues[nameOrArray] = <span class="keyword">new</span> qType(nameOrArray, q);
 			}
 			<span class="keyword">return</span> namedQueues[nameOrArray];
 		} <span class="keyword">else</span> <span class="keyword">if</span>(nameOrArray <span class="keyword">instanceof</span> Array) {
-			<span class="keyword">return</span> <span class="keyword">new</span> Q(nameOrArray, qType || q.defaultQ, q);
+			<span class="keyword">return</span> <span class="keyword">new</span> qType(nameOrArray, q);
 		} <span class="keyword">else</span> {
-			<span class="keyword">return</span> <span class="keyword">new</span> Q(<span class="literal">undefined</span>, qType || q.defaultQ, q);
+			<span class="keyword">return</span> <span class="keyword">new</span> qType(<span class="literal">undefined</span>, q);
 		}
 	};</pre></div></div>
             
@@ -161,15 +162,15 @@ this <code>qEnv</code></p>
         <li id="section-7">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>Export the <code>q</code> helper function, keeping the alteration of the global scope to a minimum</p>
+              <h2>Methods of <code>q</code>, mostly helper functions for users of <code>queue-flow</code> and the <code>Q</code> methods</h2>
+<p>Expose the <code>Q</code> constructor function (below) so third parties can extend its prototype</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">return</span> q;
-})();</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    q.Q = Q;</pre></div></div>
             
         </li>
         
@@ -177,15 +178,14 @@ this <code>qEnv</code></p>
         <li id="section-8">
             <div class="annotation">
               
-              <div class="pilwrap for-h2">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <h2>Methods of <code>q</code>, mostly helper functions for users of <code>queue-flow</code> and the <code>Q</code> methods</h2>
-<p>Expose the <code>Q</code> constructor function (below) so third parties can extend its prototype</p>
+              <p>Specify the default constructor function for this namespace (may be overridden by user)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>q.Q = Q;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    q.defaultQ = Q;</pre></div></div>
             
         </li>
         
@@ -196,11 +196,33 @@ this <code>qEnv</code></p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>Specify the default constructor function for this namespace (may be overridden by user)</p>
+              <p><code>makeAsync</code> and <code>makeSync</code> helper methods allow a more fluent API to force
+async or sync methods, suggested by a colleague, and fits better in the
+<code>queue-flow</code> API.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>q.defaultQ = Q;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    q.makeAsync = <span class="function"><span class="keyword">function</span> <span class="title">makeAsync</span><span class="params">(qfMethod)</span> {</span>
+        <span class="keyword">return</span> <span class="keyword">function</span>() {
+            <span class="keyword">return</span> qfMethod.apply(<span class="keyword">this</span>,
+                Array.prototype.slice.call(arguments, <span class="number">0</span>).map(<span class="keyword">function</span>(arg) {
+                    <span class="keyword">if</span>(arg <span class="keyword">instanceof</span> Function) arg.async = <span class="literal">true</span>;
+                    <span class="keyword">return</span> arg;
+                })
+            );
+        };
+    };
+
+    q.makeSync = <span class="function"><span class="keyword">function</span> <span class="title">makeSync</span><span class="params">(qfMethod)</span> {</span>
+        <span class="keyword">return</span> <span class="keyword">function</span>() {
+            <span class="keyword">return</span> qfMethod.apply(<span class="keyword">this</span>,
+                Array.prototype.slice.call(arguments, <span class="number">0</span>).map(<span class="keyword">function</span>(arg) {
+                    <span class="keyword">if</span>(arg <span class="keyword">instanceof</span> Function) arg.sync = <span class="literal">true</span>;
+                    <span class="keyword">return</span> arg;
+                })
+            );
+        };
+    };</pre></div></div>
             
         </li>
         
@@ -211,33 +233,15 @@ this <code>qEnv</code></p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <p><code>makeAsync</code> and <code>makeSync</code> helper methods allow a more fluent API to force
-async or sync methods, suggested by a colleague, and fits better in the
-<code>queue-flow</code> API.</p>
+              <p><code>tuple</code> converts an object into an array of arrays. The arrays are tuples of the
+key-value pairs from the object, so they can be processed individually in a queue-flow
+if desired, rather than considering the whole object as a single item in the queue.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>q.makeAsync = <span class="function"><span class="keyword">function</span> <span class="title">makeAsync</span><span class="params">(qfMethod)</span> {</span>
-    <span class="keyword">return</span> <span class="keyword">function</span>() {
-        <span class="keyword">return</span> qfMethod.apply(<span class="keyword">this</span>,
-            Array.prototype.slice.call(arguments, <span class="number">0</span>).map(<span class="keyword">function</span>(arg) {
-                <span class="keyword">if</span>(arg <span class="keyword">instanceof</span> Function) arg.async = <span class="literal">true</span>;
-                <span class="keyword">return</span> arg;
-            })
-        );
-    };
-};
-
-q.makeSync = <span class="function"><span class="keyword">function</span> <span class="title">makeSync</span><span class="params">(qfMethod)</span> {</span>
-    <span class="keyword">return</span> <span class="keyword">function</span>() {
-        <span class="keyword">return</span> qfMethod.apply(<span class="keyword">this</span>,
-            Array.prototype.slice.call(arguments, <span class="number">0</span>).map(<span class="keyword">function</span>(arg) {
-                <span class="keyword">if</span>(arg <span class="keyword">instanceof</span> Function) arg.sync = <span class="literal">true</span>;
-                <span class="keyword">return</span> arg;
-            })
-        );
-    };
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    q.tuple = <span class="function"><span class="keyword">function</span> <span class="title">tuple</span><span class="params">(obj)</span> {</span>
+        <span class="keyword">return</span> Object.keys(obj).reduce(<span class="keyword">function</span>(outArr, key) { <span class="keyword">return</span> outArr.concat([[key, obj[key]]]); }, []);
+    };</pre></div></div>
             
         </li>
         
@@ -248,15 +252,12 @@ q.makeSync = <span class="function"><span class="keyword">function</span> <span 
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p><code>tuple</code> converts an object into an array of arrays. The arrays are tuples of the
-key-value pairs from the object, so they can be processed individually in a queue-flow
-if desired, rather than considering the whole object as a single item in the queue.</p>
+              <p>Export the <code>q</code> helper function, keeping the alteration of the global scope to a minimum</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>q.tuple = <span class="function"><span class="keyword">function</span> <span class="title">tuple</span><span class="params">(obj)</span> {</span>
-    <span class="keyword">return</span> Object.keys(obj).reduce(<span class="keyword">function</span>(outArr, key) { <span class="keyword">return</span> outArr.concat([[key, obj[key]]]); }, []);
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">return</span> q;
+})();</pre></div></div>
             
         </li>
         
@@ -272,9 +273,8 @@ if desired, rather than considering the whole object as a single item in the que
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Q</span><span class="params">(nameOrArray, qType, namespace)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">Q</span><span class="params">(nameOrArray, namespace)</span> {</span>
     EventEmitter.call(<span class="keyword">this</span>);
-    <span class="keyword">this</span>.qType = !!qType &amp;&amp; qType <span class="keyword">instanceof</span> Function ? qType : Q;
     <span class="keyword">this</span>.namespace = namespace;</pre></div></div>
             
         </li>
@@ -481,33 +481,14 @@ with an event handler.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
-              <p>Ignore all of this and replace with a custom handler object</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span>(qType &amp;&amp; qType <span class="keyword">instanceof</span> Function &amp;&amp; qType !== Q) {
-        <span class="keyword">var</span> altObj = <span class="keyword">new</span> qType(nameOrArray, <span class="literal">null</span>, namespace);
-        <span class="keyword">return</span> altObj;
-    } <span class="keyword">else</span> {</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-22">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
-              </div>
               <p>Start processing the queue after the next JS event loop cycle and return the queue
 object to the remaining code.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(!handlerBusy) process.nextTick(handlerCallback.bind(<span class="keyword">this</span>));
-        <span class="keyword">if</span>(queue.length &gt; <span class="number">0</span>) <span class="keyword">this</span>.on(<span class="string">'empty'</span>, <span class="keyword">this</span>.close.bind(<span class="keyword">this</span>));
-        <span class="keyword">return</span> <span class="keyword">this</span>;
-    }
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span>(!handlerBusy) process.nextTick(handlerCallback.bind(<span class="keyword">this</span>));
+    <span class="keyword">if</span>(queue.length &gt; <span class="number">0</span>) <span class="keyword">this</span>.on(<span class="string">'empty'</span>, <span class="keyword">this</span>.close.bind(<span class="keyword">this</span>));
+    <span class="keyword">return</span> <span class="keyword">this</span>;
 }
 
 util.inherits(Q, EventEmitter);</pre></div></div>
@@ -515,11 +496,11 @@ util.inherits(Q, EventEmitter);</pre></div></div>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <h2><code>Q</code> prototype methods, the methods to be most commonly used by users of <code>queue-flow</code></h2>
 <p><code>as</code> names or aliases the given queue</p>
@@ -534,11 +515,11 @@ util.inherits(Q, EventEmitter);</pre></div></div>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p><code>concat</code> is a simpler wrapper around <code>push</code> that takes a single array
 and covers up the relatively nasty <code>apply</code> mechanism (when dealing with
@@ -556,11 +537,11 @@ is ugly and verbose.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p><code>each</code> creates an output queue that simply copies the input queue results,
 while also passing these results to the provided callback for side-effect
@@ -570,7 +551,7 @@ method.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.each = <span class="function"><span class="keyword">function</span> <span class="title">each</span><span class="params">(callback)</span> {</span>
-    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
         <span class="keyword">if</span>(!next) {
             outQueue[value]();
@@ -593,11 +574,11 @@ Q.prototype.eachSync = q.makeSync(Q.prototype.each);</pre></div></div>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p><code>wait</code> is a no-op <code>each</code> that simply delays the queue by a specified amount
 or by the amount specified by the callback function (if the argument is a
@@ -627,11 +608,11 @@ Q.prototype.waitSync = q.makeSync(Q.prototype.wait);</pre></div></div>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p><code>inOut</code> is a helper function used by several of the Q prototype methods that
 take an input queue and produce an output queue.</p>
@@ -658,11 +639,11 @@ take an input queue and produce an output queue.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p><code>map</code> creates an output queue, and executes
 the given callback on each value, pushing the
@@ -672,7 +653,7 @@ to process the input queue</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.map = <span class="function"><span class="keyword">function</span> <span class="title">map</span><span class="params">(callback)</span> {</span>
-    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="keyword">return</span> inOut.bind(<span class="keyword">this</span>)(outQueue, <span class="function"><span class="keyword">function</span> <span class="title">mapSetter</span><span class="params">(value, result)</span> {</span>
         outQueue.push(result);
     }, callback);
@@ -683,11 +664,11 @@ Q.prototype.mapSync = q.makeSync(Q.prototype.map);</pre></div></div>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p><code>reduce</code> creates an output variable, and executes once upstream has
 <code>close()</code>d, it does one of three things, depending on the value of
@@ -702,7 +683,7 @@ the <code>out</code> value.</p>
             <div class="content"><div class='highlight'><pre>Q.prototype.reduce = <span class="function"><span class="keyword">function</span> <span class="title">reduce</span><span class="params">(callback, last, initial)</span> {</span>
     <span class="keyword">var</span> out = initial;
     <span class="keyword">var</span> outQueue;
-    <span class="keyword">if</span>(!last) outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">if</span>(!last) outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
         <span class="keyword">if</span>(!next) {
             <span class="keyword">if</span>(!!last &amp;&amp; last <span class="keyword">instanceof</span> Function) last(out);
@@ -730,11 +711,11 @@ Q.prototype.reduceSync = q.makeSync(Q.prototype.reduce);</pre></div></div>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p><code>filter</code> creates an output queue, and executes
 the given callback on each value, pushing the
@@ -743,7 +724,7 @@ original value <em>only</em> if the callback returns true.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.filter = <span class="function"><span class="keyword">function</span> <span class="title">filter</span><span class="params">(callback)</span> {</span>
-    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="keyword">return</span> inOut.bind(<span class="keyword">this</span>)(outQueue, <span class="function"><span class="keyword">function</span> <span class="title">filterSetter</span><span class="params">(value, result)</span> {</span>
         <span class="keyword">if</span>(result) outQueue.push(value);
     }, callback);
@@ -754,11 +735,11 @@ Q.prototype.filterSync = q.makeSync(Q.prototype.filter);</pre></div></div>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p><code>branch</code> pushes values from the queue into another queue. If that name
 is provided directly to <code>branch</code> it will always push to that named queue.
@@ -817,11 +798,11 @@ Q.prototype.branchSync = q.makeSync(Q.prototype.branch);</pre></div></div>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p><code>everySome</code> helper function that is used to implement <code>Q.prototype.every</code>
 and <code>Q.prototype.some</code>, similar to <code>reduce</code>, the behavior of <code>everySome</code>
@@ -831,7 +812,7 @@ will change whether <code>last</code> is a function, a string, or falsy.</p>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> everySome = <span class="function"><span class="keyword">function</span> <span class="title">everySome</span><span class="params">(polarity, callback, last)</span> {</span>
     <span class="keyword">var</span> outQueue;
-    <span class="keyword">if</span>(!last) outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">if</span>(!last) outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="function"><span class="keyword">function</span> <span class="title">shortCircuit</span><span class="params">(value, next)</span> {</span> <span class="keyword">if</span>(!!next) next(); }
     <span class="keyword">this</span>.setHandler((<span class="keyword">function</span>(value, next) {
         <span class="keyword">if</span>(!next) {
@@ -868,11 +849,11 @@ will change whether <code>last</code> is a function, a string, or falsy.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p><code>every</code> returns true only if the callback has returned true every time. Immediately returns false
 when false and closes the input queue in this event. A specialization of the <code>reduce</code> method.</p>
@@ -886,11 +867,11 @@ Q.prototype.everySync = q.makeSync(Q.prototype.every);</pre></div></div>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p><code>some</code> returns true only if the callback has returned true at least once. Immediately returns true
 when true and closes the input queue in this event.</p>
@@ -904,11 +885,11 @@ Q.prototype.someAsync = q.makeSync(Q.prototype.some);</pre></div></div>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p><code>toArray</code> returns an array from the given queue. A specialization of the <code>reduce</code> method.
 Has the same three behaviors depending on the type of value <code>last</code> is, function, string, or
@@ -926,11 +907,11 @@ falsy.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p><code>flatten</code> takes an input queue and produces an output queue of values that are not arrays. Any
 array encountered is split and enqueued into the new queue recursively, unless given a depth to
@@ -939,7 +920,7 @@ flatten to (<code>true</code> == 1 in this case). Intended to be nearly identica
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.flatten = <span class="function"><span class="keyword">function</span> <span class="title">flatten</span><span class="params">(depth)</span> {</span>
-    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="function"><span class="keyword">function</span> <span class="title">processValue</span><span class="params">(value, currDepth)</span> {</span>
         <span class="keyword">if</span>(value &amp;&amp; value <span class="keyword">instanceof</span> Array) {
             <span class="keyword">if</span>(depth &amp;&amp; <span class="keyword">typeof</span>(depth) == <span class="string">'number'</span> &amp;&amp; depth == currDepth) {
@@ -967,11 +948,11 @@ flatten to (<code>true</code> == 1 in this case). Intended to be nearly identica
         </li>
         
         
-        <li id="section-37">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p><code>shortCiruit</code> and <code>ercb</code> are functions common to both the <code>node</code> and <code>exec</code> methods below.
 <code>shortCircuit</code> consumes the remaining queue without doing any processing, and <code>ercb</code> is a
@@ -1004,11 +985,11 @@ callback function with significant error logic, depending on what value is passe
         </li>
         
         
-        <li id="section-38">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p><code>node</code> is a slightly modified version of <code>map</code> that takes the input value, and if it is an
 array, provides each value as an independent argument to the provided callback. It also assumes
@@ -1025,7 +1006,7 @@ also provided.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.node = <span class="function"><span class="keyword">function</span> <span class="title">node</span><span class="params">(callback, onError)</span> {</span>
-    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
         <span class="keyword">if</span>(!(value <span class="keyword">instanceof</span> Array)) value = [value];
         <span class="keyword">if</span>(!next) {
@@ -1051,11 +1032,11 @@ Q.prototype.nodeSync = q.makeSync(Q.prototype.node);</pre></div></div>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p><code>exec</code> assumes the incoming value is a function to execute and takes a couple of arguments.
 The first is an array of arguments for the function, or a function that returns an array of
@@ -1065,7 +1046,7 @@ similar to <code>node</code> above. <code>execCommon</code> is the base for all 
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">execCommon</span><span class="params">(forceSyncAsync, args, onError)</span> {</span>
-    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
         <span class="keyword">if</span>(!next) <span class="keyword">return</span> outQueue[value]();
         <span class="keyword">if</span>(!(value <span class="keyword">instanceof</span> Function)) <span class="keyword">return</span> ercb(outQueue, onError, next, value, <span class="keyword">new</span> Error(<span class="string">'Not a function'</span>), <span class="literal">undefined</span>);
@@ -1114,11 +1095,11 @@ Q.prototype.execAsync = <span class="function"><span class="keyword">function</s
         </li>
         
         
-        <li id="section-40">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p><code>subqueue</code> allows re-usable queue definitions to be attached to the parent queue. An
 anonymous queue is provided to the callback function, and that function must return the
@@ -1128,8 +1109,8 @@ endpoint of the sub-queue that will be continued along in the chain.</p>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.subqueue = <span class="function"><span class="keyword">function</span> <span class="title">subqueue</span><span class="params">(callback)</span> {</span>
     <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
-        <span class="keyword">var</span> inQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
-        <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+        <span class="keyword">var</span> inQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+        <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
         <span class="keyword">var</span> buffer = [];
         <span class="keyword">this</span>.each(buffer.push.bind(buffer));
         callback(inQueue, <span class="keyword">function</span>(intermediateQ) {
@@ -1147,11 +1128,11 @@ Q.prototype.subqueueAsync = q.makeAsync(Q.prototype.subqueue);</pre></div></div>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p><code>promise</code> allows the usage of CommonJS Promises in queues. It takes a function that uses
 the value or values passed in as the arguments for the construction of the promise, and
@@ -1162,7 +1143,7 @@ and the failures into the specified error queue or callback. Promises are, by de
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.promise = <span class="function"><span class="keyword">function</span> <span class="title">promise</span><span class="params">(callback, error)</span> {</span>
-    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.qType(<span class="literal">null</span>, <span class="literal">null</span>, <span class="keyword">this</span>.namespace);
+    <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
     <span class="keyword">if</span>(<span class="keyword">typeof</span>(error) == <span class="string">'string'</span>) {
         error = q(error).push.bind(q(error));
     } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span>(error) == <span class="string">'object'</span>) {
@@ -1172,11 +1153,11 @@ and the failures into the specified error queue or callback. Promises are, by de
         </li>
         
         
-        <li id="section-42">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>Do nothing</p>
 
@@ -1202,11 +1183,11 @@ Q.prototype.promiseSync = <span class="keyword">function</span>() { <span class=
         </li>
         
         
-        <li id="section-43">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p><code>drain</code> is a simple callback that empties the attached queue and throws away the 
 results. This is useful for long-running queues to eliminate references to effectively

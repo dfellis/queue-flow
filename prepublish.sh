@@ -10,7 +10,7 @@ mv docs-new docs
 git commit -am "Automatic documentation for version $npm_package_version"
 git checkout master
 git stash pop
-browserify ./lib/queue-flow.js | uglifyjs > ./lib/queue-flow.min.js
+browserify ./lib/browserify.js | uglifyjs > ./lib/queue-flow.min.js
 git commit -am "Automatic minification for version $npm_package_version"
 git tag $npm_package_version
 git push

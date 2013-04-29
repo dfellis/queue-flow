@@ -30,8 +30,9 @@
 	},
 	"scripts": {
 		"realpublish": "./prepublish.sh && npm publish",
-		"test": "jshint ./lib/queue-flow.js && nodeunit ./test/test-node.js",
-        "testbrowser": "tape ./test/test-browser.js"
+		"test": "npm run jshint && nodeunit ./test/test-node.js",
+        "testbrowser": "tape ./test/test-browser.js",
+        "jshint": "./test/jshint.sh"
 	},
     "testling": {
         "files": "test/test-browser.js",

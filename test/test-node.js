@@ -9,7 +9,7 @@ for(var key in tests) {
 }
 
 exports.jscoverage = function(test) {
-	test.expect(1);
+    test.expect(1);
     jscoverage.coverageDetail();
     // Copied directly from jscoverage and edited, since getting at these values directly isn't possible
     var file;
@@ -17,13 +17,13 @@ exports.jscoverage = function(test) {
     var total;
     var touched;
     var n, len;
-    if (typeof _$jscoverage === 'undefined') {
+    if (typeof global._$jscoverage === 'undefined') {
         return;
     }
-    for (var i in _$jscoverage) {
-        file = i;
-        tmp = _$jscoverage[i];
-        if (typeof tmp === 'function' || tmp.length === undefined) continue;
+    Object.keys(global._$jscoverage).forEach(function(key) {
+        file = key;
+        tmp = global._$jscoverage[key];
+        if (typeof tmp === 'function' || tmp.length === undefined) return;
         total = touched = 0;
         for (n = 0, len = tmp.length; n < len; n++) {
             if (tmp[n] !== undefined) {
@@ -33,6 +33,6 @@ exports.jscoverage = function(test) {
             }
         }
         test.equal(total, touched, 'All lines of code exercised by the tests');
-    }
+    });
     test.done();
 };

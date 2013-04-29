@@ -846,6 +846,34 @@ exports.manuallyDropQueue = function(test) {
     test.done();
 };
 
+exports.unnamedQueueProperlyClosed = function(test) {
+    bootstrap(test);
+    test.expect(2);
+    var cmd = {test1: "value1", test2: "value2"};
+
+    q([cmd])
+        .node(function(c, cb){
+            setTimeout(function(){
+                cb(null, c);
+            }, 1000);
+        }, 'error')
+        .node(function(c, cb){
+            setTimeout(function(){
+                cb(null, c);
+            }, 1000);
+        }, 'error')
+        .node(function(c, cb){
+            setTimeout(function(){
+                cb(null, c);
+            }, 1000);
+        }, 'error')
+        .toArray(function(result) {
+            test.ok(result instanceof Array, 'received an array as expected');
+            test.equal(result[0], cmd, 'the array has the original "cmd" object in it');
+            test.done();
+        });
+};
+
 exports.complexity = function(test) {
     bootstrap(test);
 	test.expect(1);

@@ -23,7 +23,8 @@
 		"jscoverage": "*",
         "complexity-report": "*",
         "jshint": "*",
-        "tape": "*"
+        "tape": "*",
+        "coveralls": "*"
 	},
 	"engines": {
 		"node": ">=0.6"

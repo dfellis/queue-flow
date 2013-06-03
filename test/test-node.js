@@ -1,6 +1,7 @@
 var jscoverage = require('jscoverage');
 jscoverage.enableCoverage(true);
 var q = jscoverage.require(module, '../lib/queue-flow');
+var coveralls = require('coveralls');
 var tests = require('./test');
 tests.getQueueFlow(q);
 
@@ -20,13 +21,16 @@ exports.jscoverage = function(test) {
     if (typeof global._$jscoverage === 'undefined') {
         return;
     }
+    var lcov = "";
     Object.keys(global._$jscoverage).forEach(function(key) {
         file = key;
+        lcov += "SF:" + file + "\n";
         tmp = global._$jscoverage[key];
         if (typeof tmp === 'function' || tmp.length === undefined) return;
         total = touched = 0;
         for (n = 0, len = tmp.length; n < len; n++) {
             if (tmp[n] !== undefined) {
+                lcov += "DA:" + n + "," + tmp[n] + "\n";
                 total ++;
                 if (tmp[n] > 0)
                     touched ++;
@@ -34,5 +38,7 @@ exports.jscoverage = function(test) {
         }
         test.equal(total, touched, 'All lines of code exercised by the tests');
     });
+    lcov += "end_of_record\n";
+    coveralls.handleInput(lcov);
     test.done();
 };

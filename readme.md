@@ -1,6 +1,6 @@
 # [![queue-flow](http://dfellis.github.com/queue-flow/images/queue-flow-logo.svg)](http://dfellis.github.com/queue-flow)
 
-[![Build Status](https://secure.travis-ci.org/dfellis/queue-flow.png)](http://travis-ci.org/dfellis/queue-flow)
+[![Build Status](https://secure.travis-ci.org/dfellis/queue-flow.png)](http://travis-ci.org/dfellis/queue-flow) [![Dependency Status](https://david-dm.org/dfellis/queue-flow.png)](https://david-dm.org/dfellis/queue-flow)
 
 [![browser support](http://ci.testling.com/dfellis/queue-flow.png)](http://ci.testling.com/dfellis/queue-flow)
 

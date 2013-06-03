@@ -39,6 +39,6 @@ exports.jscoverage = function(test) {
         test.equal(total, touched, 'All lines of code exercised by the tests');
     });
     lcov += "end_of_record\n";
-    coveralls.handleInput(lcov);
+    if(process.env.TRAVIS) coveralls.handleInput(lcov);
     test.done();
 };

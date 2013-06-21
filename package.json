@@ -13,14 +13,14 @@
 	"main": "./lib/queue-flow",
 	"dependencies": {
         "is-async": "0.0.2",
-        "async-cancelable-events": "0.0.3"
+        "async-cancelable-events": "0.0.4"
     },
 	"devDependencies": {
 		"nodeunit": "*",
 		"docco": "*",
         "browserify": "*",
 		"uglify-js": "*",
-		"jscoverage": "*",
+		"jscoverage": "https://github.com/dfellis/jscoverage/archive/master.tar.gz",
         "complexity-report": "*",
         "jshint": "*",
         "tape": "*",
@@ -44,8 +44,7 @@
             "safari": [ 6.0 ],
             "opera": [ 11.0, "11.6", 12.0, "next" ],
             "iphone": [ 6 ],
-            "ipad": [ 6 ],
-            "android-browser": [ "4.2" ]
+            "ipad": [ 6 ]
         }
     }
 }

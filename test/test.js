@@ -243,13 +243,42 @@ exports.everySomeNamedQueue = function(test) {
 
 exports.everySomeAnonQueue = function(test) {
     bootstrap(test);
-    test.expect(1);
+    test.expect(2);
     q([7, 8, 'open the gate'])
         .some(function(value) {
             return value === value*1;
         })
         .each(function(result) {
             test.equal(true, result, 'some finds the first number');
+        })
+        .on('close', function() {
+            test.ok(true, 'the queue closed correctly');
+            test.done();
+        });
+};
+
+exports.everySomeAsyncMethod = function(test) {
+    bootstrap(test);
+    test.expect(1);
+    q([9, 10, 'all over again'])
+        .some(function(value, callback) {
+            callback(value === value*1);
+        })
+        .each(function(result) {
+            test.equal(true, result, 'some finds the first number even if async');
+            test.done();
+        });
+};
+
+exports.everySomeFailPath = function(test) {
+    bootstrap(test);
+    test.expect(1);
+    q(['foo', 'bar', 'baz'])
+        .some(function(value) {
+            return value === value*1;
+        })
+        .each(function(result) {
+            test.equal(false, result, 'some finds no numbers');
             test.done();
         });
 };
@@ -271,6 +300,32 @@ exports.everySomeClosedQueue = function(test) {
             test.ok(!result, 'some value was not a number!');
             test.done();
         });
+};
+
+exports.everySomeSubmittedTestCase = function(test) {
+    bootstrap(test);
+    test.expect(4);
+    function someCheck(callback) {
+        q([null])
+            .node(function(args, cb) {
+                test.ok(true, 'first method called');
+                cb(null, true);
+            })
+            .some(function(shouldContinue) { return shouldContinue; })
+            .node(function(args, cb) {
+                test.ok(true, 'second method called');
+                cb();
+            })
+            .on('close', function() {
+                test.ok(true, 'close event occurred');
+                callback();
+            });
+    }
+
+    someCheck(function() {
+        test.ok(true, 'callback finally called');
+        test.done();
+    });
 };
 
 exports.flattenAndNode = function(test) {

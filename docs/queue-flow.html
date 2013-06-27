@@ -603,9 +603,22 @@ to process the input queue</p>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.map = <span class="function"><span class="keyword">function</span> <span class="title">map</span><span class="params">(callback)</span> {</span>
     <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
-    <span class="keyword">return</span> inOut.call(<span class="keyword">this</span>, outQueue, <span class="function"><span class="keyword">function</span> <span class="title">mapSetter</span><span class="params">(value, result)</span> {</span>
-        outQueue.push(result);
-    }, callback);
+    <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
+        <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
+            <span class="keyword">if</span>(!next) {
+                outQueue[value]();
+            } <span class="keyword">else</span> {
+                callback(value, <span class="keyword">function</span>(result) {
+                    next(outQueue.push.bind(outQueue, result));
+                });
+            }
+        });
+    } <span class="keyword">else</span> {
+        <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
+            <span class="keyword">var</span> result = callback(value);
+            next(outQueue.push.bind(outQueue, result));
+        });
+    }
 };
 Q.prototype.mapAsync = makeAsync(Q.prototype.map);
 Q.prototype.mapSync = makeSync(Q.prototype.map);</pre></div></div>

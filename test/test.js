@@ -171,9 +171,9 @@ exports.latency = function(test) {
     var currentMapVal = Infinity;
     var reducedLatency = false;
     q([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        .map(function(val) {
+        .map(function(val, callback) {
             currentMapVal = val;
-            return val;
+            callback(val);
         })
         .reduce(function(prev, val) {
             if(currentMapVal < 10) {
@@ -950,3 +950,4 @@ exports.complexity = function(test) {
         test.done();
     });
 };
+

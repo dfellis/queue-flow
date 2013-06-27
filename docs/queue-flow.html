@@ -289,13 +289,11 @@ as ready for when the data next arrives</p>
         <span class="keyword">if</span>(queue &amp;&amp; queue.length &gt; <span class="number">0</span>) {
             handlerBusy = <span class="literal">true</span>;
             nextTick(<span class="keyword">function</span>() {
-                handlerEmitter(<span class="string">'pull'</span>, queue[<span class="number">0</span>], <span class="keyword">function</span>(result) {
-                    <span class="keyword">if</span>(result &amp;&amp; handler <span class="keyword">instanceof</span> Function) {
-                        handler(queue.shift(), handlerCallback);
-                    } <span class="keyword">else</span> {
-                        handlerBusy = <span class="literal">false</span>;
-                    }
-                });
+                <span class="keyword">if</span>(handler <span class="keyword">instanceof</span> Function) {
+                    handler(queue.shift(), handlerCallback);
+                } <span class="keyword">else</span> {
+                    handlerBusy = <span class="literal">false</span>;
+                }
             });
         } <span class="keyword">else</span> <span class="keyword">if</span>(!recentlyEmptied) {
             handlerEmitter(<span class="string">'empty'</span>);
@@ -609,16 +607,24 @@ to process the input queue</p>
                 outQueue[value]();
             } <span class="keyword">else</span> {
                 callback(value, <span class="keyword">function</span>(result) {
-                    next(outQueue.push.bind(outQueue, result));
+                    next(<span class="keyword">function</span>() {
+                        outQueue.push(result);
+                    });
                 });
             }
         });
     } <span class="keyword">else</span> {
         <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-            <span class="keyword">var</span> result = callback(value);
-            next(outQueue.push.bind(outQueue, result));
+            <span class="keyword">if</span>(!next) {
+                outQueue[value]();
+            } <span class="keyword">else</span> {
+                next(<span class="keyword">function</span>() {
+                    outQueue.push(callback(value));
+                });
+            }
         });
     }
+    <span class="keyword">return</span> outQueue;
 };
 Q.prototype.mapAsync = makeAsync(Q.prototype.map);
 Q.prototype.mapSync = makeSync(Q.prototype.map);</pre></div></div>

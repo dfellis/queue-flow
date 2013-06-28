@@ -166,11 +166,14 @@ exports.branch = function(test) {
 };
 
 exports.latency = function(test) {
+    // This behavior is now turned **off** by default because of the heavy performance penalty for truly synchronous queues
+    // Inserting ``.wait(0)`` at the beginning of the queue turns it back on.
     bootstrap(test);
     test.expect(1);
     var currentMapVal = Infinity;
     var reducedLatency = false;
     q([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        .wait(0)
         .map(function(val, callback) {
             currentMapVal = val;
             callback(val);
@@ -483,7 +486,7 @@ exports.exists = function(test) {
             setTimeout(function() {
                 test.equal(q.exists('exists'), false, 'closed object correctly deleted');
                 test.done();
-            }, 50); // handler for 'close' event can return false and block the closing of the queue
+            }, 500); // handler for 'close' event can return false and block the closing of the queue
             // so it actually runs *just before* the closing occurs
         })
         .close();

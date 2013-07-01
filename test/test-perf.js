@@ -1,6 +1,12 @@
 var q = require('../lib/queue-flow');
 
+function bootstrap(test) {
+    test.expect = test.expect || test.plan;
+    test.done = test.done || test.end;
+}
+
 exports.perf = function(test) {
+    bootstrap(test);
     test.expect(2);
     var testArray = [];
     var runs = 100000;

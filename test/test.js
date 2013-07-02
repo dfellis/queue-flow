@@ -57,10 +57,10 @@ exports.as = function(test) {
 exports.push = function(test) {
     bootstrap(test);
     test.expect(1);
-    q('test2').push(1, 2, 3).close().toArray(function(result) {
+    q('test2').push(1, 2, 3).toArray(function(result) {
         test.equal([1, 2, 3].toString(), result.toString(), 'named queue with elements pushed after-the-fact properly referenceable');
         test.done();
-    });
+    }).close();
 };
 
 exports.map = function(test) {

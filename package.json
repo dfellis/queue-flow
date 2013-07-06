@@ -31,8 +31,9 @@
 	},
 	"scripts": {
 		"realpublish": "./prepublish.sh && npm publish",
-		"test": "npm run jshint && nodeunit ./test/test-node.js && nodeunit ./test/test-perf.js",
+		"test": "npm run jshint && nodeunit ./test/test-node.js && npm run testperf",
         "testbrowser": "tape ./test/test-browser.js",
+        "testperf": "nodeunit ./test/test-perf.js",
         "jshint": "./test/jshint.sh"
 	},
     "testling": {

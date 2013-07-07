@@ -1,6 +1,6 @@
 # [![queue-flow](http://dfellis.github.com/queue-flow/images/queue-flow-logo.svg)](http://dfellis.github.com/queue-flow)
 
-[![NPM version](https://badge.fury.io/js/queue-flow.png)](http://badge.fury.io/js/queue-flow) [![Build Status](https://secure.travis-ci.org/dfellis/queue-flow.png)](http://travis-ci.org/dfellis/queue-flow) [![Dependency Status](https://david-dm.org/dfellis/queue-flow.png)](https://david-dm.org/dfellis/queue-flow) [![Coverage Status](https://coveralls.io/repos/dfellis/queue-flow/badge.png?branch=master)](https://coveralls.io/r/dfellis/queue-flow?branch=master)
+[![NPM version](https://badge.fury.io/js/queue-flow.png)](http://badge.fury.io/js/queue-flow) [![Build Status](https://secure.travis-ci.org/dfellis/queue-flow.png)](http://travis-ci.org/dfellis/queue-flow) [![Dependency Status](https://gemnasium.com/dfellis/queue-flow.png)](https://gemnasium.com/dfellis/queue-flow) [![Coverage Status](https://coveralls.io/repos/dfellis/queue-flow/badge.png?branch=master)](https://coveralls.io/r/dfellis/queue-flow?branch=master)
 
 [![browser support](http://ci.testling.com/dfellis/queue-flow.png)](http://ci.testling.com/dfellis/queue-flow)
 

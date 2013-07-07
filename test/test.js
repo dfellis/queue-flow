@@ -926,17 +926,17 @@ exports.unnamedQueueProperlyClosed = function(test) {
         .node(function(c, cb){
             setTimeout(function(){
                 cb(null, c);
-            }, 1000);
+            }, 100);
         }, 'error')
         .node(function(c, cb){
             setTimeout(function(){
                 cb(null, c);
-            }, 1000);
+            }, 100);
         }, 'error')
         .node(function(c, cb){
             setTimeout(function(){
                 cb(null, c);
-            }, 1000);
+            }, 100);
         }, 'error')
         .toArray(function(result) {
             test.ok(result instanceof Array, 'received an array as expected');

@@ -945,6 +945,17 @@ exports.unnamedQueueProperlyClosed = function(test) {
         });
 };
 
+exports.pushToClosedQueue = function(test) {
+    bootstrap(test);
+    test.expect(1);
+    var deadQueue = q([1, 2, 3]);
+    deadQueue.kill();
+    test.throws(function() {
+        deadQueue.push(4, 5, 6);
+    }, /Queue already closed/);
+    test.done();
+};
+
 exports.complexity = function(test) {
     bootstrap(test);
     test.expect(1);

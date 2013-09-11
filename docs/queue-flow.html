@@ -394,6 +394,7 @@ processed and de-queued.</p>
                     handlerSet = <span class="literal">false</span>;
                     handler = <span class="keyword">function</span>() {};
                     queue = <span class="literal">undefined</span>;
+                    <span class="keyword">this</span>.push = <span class="keyword">this</span>.pushOne = <span class="keyword">function</span>() { <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Queue already closed'</span>); };
                     <span class="keyword">if</span>(namespace) namespace.clearQueue(<span class="keyword">this</span>);
                     <span class="keyword">if</span>(tempHandler <span class="keyword">instanceof</span> Function) {
                         tempHandler(<span class="string">'close'</span>);
@@ -429,6 +430,7 @@ with an event handler.</p>
         handlerSet = <span class="literal">false</span>;
         handler = <span class="keyword">function</span>() {};
         queue = <span class="literal">undefined</span>;
+        <span class="keyword">this</span>.push = <span class="keyword">this</span>.pushOne = <span class="keyword">function</span>() { <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Queue already closed'</span>); };
         <span class="keyword">if</span>(namespace) namespace.clearQueue(<span class="keyword">this</span>);
         <span class="keyword">if</span>(tempHandler <span class="keyword">instanceof</span> Function) {
             tempHandler(<span class="string">'kill'</span>);

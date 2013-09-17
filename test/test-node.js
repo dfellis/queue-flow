@@ -3,10 +3,10 @@ jscoverage.enableCoverage(true);
 var q = jscoverage.require(module, '../lib/queue-flow');
 var coveralls = require('coveralls');
 var tests = require('./test');
-tests.getQueueFlow(q);
+tests.getObjs(q, require('fs'));
 
 for(var key in tests) {
-    if(key !== 'getQueueFlow') exports[key] = tests[key];
+    if(key !== 'getObjs') exports[key] = tests[key];
 }
 
 exports.jscoverage = function(test) {

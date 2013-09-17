@@ -1,10 +1,10 @@
-var fs = require('fs');
 var cr = require('complexity-report');
 var isAsync = require('is-async');
-var q;
+var q, fs;
 
-exports.getQueueFlow = function(qf) {
+exports.getObjs = function(qf, f) {
     q = qf;
+    fs = f;
 };
 
 function bootstrap(test) {

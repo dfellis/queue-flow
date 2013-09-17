@@ -956,6 +956,31 @@ exports.pushToClosedQueue = function(test) {
     test.done();
 };
 
+exports.readStreams = function(test) {
+    bootstrap(test);
+    test.expect(1);
+    q(fs.createReadStream('./test/test.js', { encoding: 'utf8' }))
+        .toArray(function(arr) {
+            test.ok(arr.length > 0, 'got the array');
+            test.done();
+        });
+};
+
+exports.pipe = function(test) {
+    bootstrap(test);
+    test.expect(2);
+    var fakeWritable = {
+        write: function write(data) {
+            test.ok(!!data, 'received data');
+        },
+        end: function end() {
+            test.ok(true, 'stream was closed');
+            test.done();
+        }
+    };
+    q(['foo']).pipe(fakeWritable);
+};
+
 exports.complexity = function(test) {
     bootstrap(test);
     test.expect(1);

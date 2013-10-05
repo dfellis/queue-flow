@@ -5,7 +5,11 @@ var perfTest = require('./test-perf');
 tests.getObjs(q, {});
 
 for(var key in tests) {
-    if(key !== 'getObjs' && key !== 'flattenAndNode' && key !== 'readStreams' && key !== 'complexity') tape(key, tests[key]);
+    if (key !== 'getObjs' &&
+        key !== 'flattenAndNode' &&
+        key !== 'readStreams' &&
+        key !== 'pipe' &&
+        key !== 'complexity') tape(key, tests[key]);
 }
 
 for(var key in perfTest) {

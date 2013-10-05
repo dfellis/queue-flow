@@ -4,6 +4,8 @@
 
 [![browser support](http://ci.testling.com/dfellis/queue-flow.png)](http://ci.testling.com/dfellis/queue-flow)
 
+## NOTE: 0.7.x is the development branch of queue-flow. 0.6.19 is the current stable release of queue-flow. Do not '*' your dependency on queue-flow.
+
 ## Quick install instructions
 
 For Node.js

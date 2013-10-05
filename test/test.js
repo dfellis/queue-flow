@@ -978,7 +978,12 @@ exports.pipe = function(test) {
             test.done();
         }
     };
-    q(['foo']).pipe(fakeWritable);
+    fs.createReadStream('./test/test.js', { encoding: 'utf8' })
+        .pipe(q())
+        .reduce(function(cum, data) {
+            return cum + data;
+        }, null, "")
+        .pipe(fakeWritable);
 };
 
 exports.complexity = function(test) {

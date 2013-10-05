@@ -49,6 +49,7 @@ THE SOFTWARE.</p>
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> isAsync = require(<span class="string">'is-async'</span>);
 <span class="keyword">var</span> EventEmitter = require(<span class="string">'async-cancelable-events'</span>);
 <span class="keyword">var</span> util = require(<span class="string">'util'</span>);
+<span class="keyword">var</span> Infiniqueue = require(<span class="string">'infiniqueue'</span>);
 
 <span class="keyword">var</span> nextTick = global.setImmediate ? global.setImmediate : process.nextTick;
 
@@ -234,7 +235,12 @@ if desired, rather than considering the whole object as a single item in the que
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.wasName = nameOrArray <span class="keyword">instanceof</span> Array ? <span class="literal">false</span> : <span class="literal">true</span>;
-    <span class="keyword">var</span> queue = <span class="keyword">this</span>.queue = nameOrArray <span class="keyword">instanceof</span> Array ? nameOrArray : [];
+    <span class="keyword">var</span> queue = <span class="keyword">new</span> Infiniqueue();
+    <span class="keyword">if</span>(nameOrArray <span class="keyword">instanceof</span> Array) {
+        <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; nameOrArray.length; i++) {
+            queue.enqueue(nameOrArray[i]);
+        }
+    }
     <span class="keyword">var</span> handler = <span class="keyword">function</span>() {};
     <span class="keyword">var</span> handlerSet = <span class="literal">false</span>;
     <span class="keyword">var</span> handlerBusy = <span class="literal">false</span>;
@@ -279,7 +285,7 @@ mark ready again.</p>
             <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> handlerEmitter = <span class="keyword">this</span>.emit.bind(<span class="keyword">this</span>);
     <span class="keyword">var</span> handlerRuns = <span class="number">0</span>;
     <span class="function"><span class="keyword">function</span> <span class="title">handlerCall</span><span class="params">()</span> {</span>
-        handler(queue.shift(), handlerCallback);
+        handler(queue.dequeue(), handlerCallback);
     }</pre></div></div>
             
         </li>
@@ -335,7 +341,9 @@ calls the special handler function, if it&#39;s ready.</p>
         recentlyEmptied = <span class="literal">false</span>;
         <span class="keyword">var</span> values = Array.prototype.slice.call(arguments, <span class="number">0</span>);
         <span class="keyword">this</span>.emitSync(<span class="string">'push'</span>, values);
-        Array.prototype.push.apply(queue, values);
+        <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; values.length; i++) {
+            queue.enqueue(values[i]);
+        }
         <span class="keyword">if</span>(handlerSet &amp;&amp; !handlerBusy) handlerCallback(<span class="keyword">function</span>() {});
         <span class="keyword">return</span> <span class="keyword">this</span>;
     }.bind(<span class="keyword">this</span>);</pre></div></div>
@@ -376,7 +384,7 @@ an event handler to call <code>push</code></p>
     <span class="keyword">this</span>.pushOne = <span class="function"><span class="keyword">function</span> <span class="title">pushOne</span><span class="params">(val)</span> {</span>
         recentlyEmptied = <span class="literal">false</span>;
         <span class="keyword">this</span>.emitSync(<span class="string">'push'</span>, [val]);
-        queue.push(val);
+        queue.enqueue(val);
         <span class="keyword">if</span>(handlerSet &amp;&amp; !handlerBusy) handlerCallback(<span class="keyword">function</span>() {});
         <span class="keyword">return</span> <span class="keyword">this</span>;
     }.bind(<span class="keyword">this</span>);</pre></div></div>
@@ -433,6 +441,7 @@ processed and de-queued.</p>
                     <span class="keyword">var</span> tempHandler = handler;
                     handlerSet = <span class="literal">false</span>;
                     handler = <span class="keyword">function</span>() {};
+                    queue.shutdown();
                     queue = <span class="literal">undefined</span>;
                     <span class="keyword">this</span>.push = <span class="keyword">this</span>.pushOne = <span class="keyword">function</span>() { <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Queue already closed'</span>); };
                     <span class="keyword">if</span>(namespace) namespace.clearQueue(<span class="keyword">this</span>);
@@ -484,6 +493,7 @@ with an event handler.</p>
         <span class="keyword">var</span> tempHandler = handler;
         handlerSet = <span class="literal">false</span>;
         handler = <span class="keyword">function</span>() {};
+        queue.shutdown();
         queue = <span class="literal">undefined</span>;
         <span class="keyword">this</span>.push = <span class="keyword">this</span>.pushOne = <span class="keyword">function</span>() { <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Queue already closed'</span>); };
         <span class="keyword">if</span>(namespace) namespace.clearQueue(<span class="keyword">this</span>);
@@ -952,14 +962,25 @@ falsy.</p>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.toArray = <span class="function"><span class="keyword">function</span> <span class="title">toArray</span><span class="params">(last)</span> {</span>
     <span class="keyword">var</span> outQueue = <span class="keyword">this</span>;
+    <span class="keyword">var</span> outArr = [];
     <span class="keyword">if</span>(!last) {
         outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.namespace);
-        <span class="keyword">this</span>.on(<span class="string">'close'</span>, <span class="keyword">function</span>() { outQueue.push(<span class="keyword">this</span>.queue).close(); }.bind(<span class="keyword">this</span>));
     } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span> last === <span class="string">'string'</span>) {
-        <span class="keyword">this</span>.on(<span class="string">'close'</span>, <span class="keyword">function</span>() { q(last).push(<span class="keyword">this</span>.queue).close(); }.bind(<span class="keyword">this</span>));
-    } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span> last === <span class="string">'function'</span>) {
-        <span class="keyword">this</span>.on(<span class="string">'close'</span>, last.bind(<span class="keyword">this</span>, <span class="keyword">this</span>.queue));
+        outQueue = q(last);
     }
+    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
+        <span class="keyword">if</span>(next) {
+            next(<span class="keyword">function</span>() {
+                outArr.push(value);
+            });
+        } <span class="keyword">else</span> {
+            <span class="keyword">if</span>(<span class="keyword">typeof</span> last === <span class="string">'function'</span>) {
+                last(outArr);
+            } <span class="keyword">else</span> {
+                outQueue.push(outArr)[value]();
+            }
+        }
+    });
     <span class="keyword">if</span>(!<span class="keyword">this</span>.wasName) <span class="keyword">this</span>.close();
     <span class="keyword">return</span> outQueue;
 };</pre></div></div>

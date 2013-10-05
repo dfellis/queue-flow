@@ -9,7 +9,7 @@ exports.perf = function(test) {
     bootstrap(test);
     test.expect(2);
     var testArray = [];
-    var runs = 3000000;
+    var runs = 100000;
     for(var i = 0; i < runs; i++) {
         testArray[i] = i;
     }

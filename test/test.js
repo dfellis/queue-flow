@@ -48,7 +48,7 @@ exports.as = function(test) {
     bootstrap(test);
     test.expect(1);
     q([1, 2, 3]).as('test1');
-    q('test1').close().toArray(function(result) {
+    q('test1').toArray(function(result) {
         test.equal([1, 2, 3].toString(), result.toString(), 'named queue properly referenceable');
         test.done();
     });

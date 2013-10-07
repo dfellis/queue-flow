@@ -803,21 +803,6 @@ exports.asyncBranch = function(test) {
         });
 };
 
-exports.defaultQ = function(test) {
-    bootstrap(test);
-    test.expect(1);
-    var testQ = q.ns();
-    function fakeConstructor() {
-        this.foo = function() {
-            return 'foo';
-        };
-        return this;
-    }
-    testQ.defaultQ = fakeConstructor;
-    test.equal(testQ('test').foo(), 'foo', 'used the fake constructor');
-    test.done();
-};
-
 exports.emptyAnonymousQ = function(test) {
     bootstrap(test);
     test.expect(1);

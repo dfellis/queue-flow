@@ -132,8 +132,9 @@ async or sync methods, suggested by a colleague, and fits better in the
             <span class="keyword">this</span>.queue.enqueue(nameOrArray[i]);
         }
     }
-    <span class="keyword">this</span>.openQueue = [];
+    <span class="keyword">this</span>.openQueue = <span class="keyword">new</span> Infiniqueue();
     <span class="keyword">this</span>.handler = <span class="keyword">function</span>() {};
+    <span class="keyword">this</span>.ender = <span class="keyword">function</span>() {};
     <span class="keyword">this</span>.handlerSet = <span class="literal">false</span>;
     <span class="keyword">this</span>.handlerRuns = <span class="number">0</span>;</pre></div></div>
             
@@ -192,8 +193,9 @@ mark ready again.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>Q.prototype.setHandler = <span class="function"><span class="keyword">function</span> <span class="title">setHandler</span><span class="params">(handlerFunc)</span> {</span>
+            <div class="content"><div class='highlight'><pre>Q.prototype.setHandlers = <span class="function"><span class="keyword">function</span> <span class="title">setHandlers</span><span class="params">(handlerFunc, endFunc)</span> {</span>
     <span class="keyword">this</span>.handler = handlerFunc;
+    <span class="keyword">this</span>.ender = endFunc;
     <span class="keyword">this</span>.handlerSet = <span class="literal">true</span>;
     <span class="keyword">this</span>.enqueueParallelism();
     <span class="keyword">return</span> <span class="keyword">this</span>;
@@ -216,12 +218,13 @@ as ready for when the data next arrives</p>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.handlerCallback = <span class="function"><span class="keyword">function</span> <span class="title">handlerCallback</span><span class="params">(openQueueStruct, done)</span> {</span>
     <span class="keyword">this</span>.handlerRuns = ++<span class="keyword">this</span>.handlerRuns % <span class="number">50</span>;
-    openQueueStruct.done = done;
-    <span class="keyword">var</span> currStruct = <span class="keyword">this</span>.openQueue[<span class="number">0</span>];
-    <span class="keyword">while</span>(!!currStruct &amp;&amp; currStruct.done <span class="keyword">instanceof</span> Function) {
-        currStruct.done();
-        <span class="keyword">this</span>.openQueue.shift();
-        currStruct = <span class="keyword">this</span>.openQueue[<span class="number">0</span>];
+    openQueueStruct.done = <span class="literal">true</span>;
+    openQueueStruct.doneFunc = done;
+    <span class="keyword">while</span>(<span class="keyword">this</span>.openQueue.length) {
+        <span class="keyword">var</span> currStruct = <span class="keyword">this</span>.openQueue.start.val;
+        <span class="keyword">if</span>(!currStruct.done) <span class="keyword">break</span>;
+        currStruct.doneFunc();
+        <span class="keyword">this</span>.openQueue.dequeue();
     }
     <span class="keyword">if</span>(<span class="keyword">this</span>.openQueue.length === <span class="number">0</span> &amp;&amp; (!<span class="keyword">this</span>.queue || <span class="keyword">this</span>.queue.length === <span class="number">0</span>)) {
         <span class="keyword">this</span>.emitSync(<span class="string">'empty'</span>);
@@ -244,6 +247,7 @@ as ready for when the data next arrives</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.enqueueParallelism = <span class="function"><span class="keyword">function</span> <span class="title">enqueueParallelism</span><span class="params">()</span> {</span>
+    <span class="keyword">var</span> nullFunc = <span class="keyword">function</span>() {};
     <span class="keyword">if</span>(<span class="keyword">this</span>.handlerSet) {
         <span class="keyword">var</span> numToProcess = (<span class="keyword">this</span>.options.parallelism - <span class="keyword">this</span>.openQueue.length) &gt; <span class="keyword">this</span>.queue.length ? <span class="keyword">this</span>.queue.length : <span class="keyword">this</span>.options.parallelism - <span class="keyword">this</span>.openQueue.length;
         <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; numToProcess; i++) {</pre></div></div>
@@ -265,13 +269,18 @@ creating an explicit id</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> openQueueStruct = {
-                done: <span class="literal">false</span>
+                done: <span class="literal">false</span>,
+                doneFunc: nullFunc
             };
-            <span class="keyword">this</span>.openQueue.push(openQueueStruct);
+            <span class="keyword">this</span>.openQueue.enqueue(openQueueStruct);
             <span class="keyword">if</span> (<span class="keyword">this</span>.handlerRuns === <span class="number">0</span>) {
-                nextTick(<span class="keyword">this</span>.handler.bind(<span class="keyword">this</span>, <span class="keyword">this</span>.queue.dequeue(), <span class="keyword">this</span>.handlerCallback.bind(<span class="keyword">this</span>, openQueueStruct)));
+                <span class="comment">/* jshint loopfunc: true */</span>
+                <span class="keyword">var</span> self = <span class="keyword">this</span>;
+                nextTick(<span class="keyword">function</span>() {
+                    self.handler(self, self.queue.dequeue(), openQueueStruct);
+                });
             } <span class="keyword">else</span> {
-                <span class="keyword">this</span>.handler(<span class="keyword">this</span>.queue.dequeue(), <span class="keyword">this</span>.handlerCallback.bind(<span class="keyword">this</span>, openQueueStruct));
+                <span class="keyword">this</span>.handler(<span class="keyword">this</span>, <span class="keyword">this</span>.queue.dequeue(), openQueueStruct);
             }
         }
     }
@@ -292,10 +301,8 @@ calls the special handler function, if it&#39;s ready.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.push = <span class="function"><span class="keyword">function</span> <span class="title">push</span><span class="params">()</span> {</span>
-    <span class="keyword">var</span> values = Array.prototype.slice.call(arguments, <span class="number">0</span>);
-    <span class="keyword">this</span>.emitSync(<span class="string">'push'</span>, values);
-    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; values.length; i++) {
-        <span class="keyword">this</span>.queue.enqueue(values[i]);
+    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; arguments.length; i++) {
+        <span class="keyword">this</span>.queue.enqueue(arguments[i]);
     }
     <span class="keyword">this</span>.enqueueParallelism();
     <span class="keyword">return</span> <span class="keyword">this</span>;
@@ -317,7 +324,6 @@ calls the special handler function, if it&#39;s ready.</p>
             <div class="content"><div class='highlight'><pre>Q.prototype.write = Q.prototype.push;
 
 Q.prototype.pushOne = <span class="function"><span class="keyword">function</span> <span class="title">pushOne</span><span class="params">(val)</span> {</span>
-    <span class="keyword">this</span>.emitSync(<span class="string">'push'</span>, [val]);
     <span class="keyword">this</span>.queue.enqueue(val);
     <span class="keyword">this</span>.enqueueParallelism();
     <span class="keyword">return</span> <span class="keyword">this</span>;
@@ -372,15 +378,16 @@ processed and de-queued.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> flushQueue = <span class="keyword">function</span>() {
-                <span class="keyword">var</span> tempHandler = <span class="keyword">this</span>.handler;
                 <span class="keyword">this</span>.handlerSet = <span class="literal">false</span>;
                 <span class="keyword">this</span>.handler = <span class="keyword">function</span>() {};
-                <span class="keyword">this</span>.queue.shutdown();
+                <span class="keyword">if</span>(<span class="keyword">this</span>.queue) <span class="keyword">this</span>.queue.shutdown();
                 <span class="keyword">this</span>.queue = <span class="literal">undefined</span>;
+                <span class="keyword">if</span>(<span class="keyword">this</span>.openQueue) <span class="keyword">this</span>.openQueue.shutdown();
+                <span class="keyword">this</span>.openQueue = <span class="literal">undefined</span>;
                 <span class="keyword">this</span>.push = <span class="keyword">this</span>.pushOne = <span class="keyword">function</span>() { <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Queue already closed'</span>); };
                 <span class="keyword">if</span>(<span class="keyword">this</span>.namespace) <span class="keyword">this</span>.namespace.clearQueue(<span class="keyword">this</span>);
-                <span class="keyword">if</span>(tempHandler <span class="keyword">instanceof</span> Function) {
-                    tempHandler(<span class="string">'close'</span>);
+                <span class="keyword">if</span>(<span class="keyword">this</span>.ender <span class="keyword">instanceof</span> Function) {
+                    <span class="keyword">this</span>.ender(<span class="string">'close'</span>);
                 }
             }.bind(<span class="keyword">this</span>);
             <span class="keyword">if</span>(<span class="keyword">this</span>.openQueue &amp;&amp; !<span class="keyword">this</span>.openQueue.length &amp;&amp; <span class="keyword">this</span>.queue &amp;&amp; !<span class="keyword">this</span>.queue.length) {
@@ -425,15 +432,16 @@ with an event handler.</p>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.kill = <span class="function"><span class="keyword">function</span> <span class="title">kill</span><span class="params">()</span> {</span>
     <span class="keyword">this</span>.emitSync(<span class="string">'kill'</span>);
-    <span class="keyword">var</span> tempHandler = <span class="keyword">this</span>.handler;
     <span class="keyword">this</span>.handlerSet = <span class="literal">false</span>;
     <span class="keyword">this</span>.handler = <span class="keyword">function</span>() {};
     <span class="keyword">this</span>.queue.shutdown();
     <span class="keyword">this</span>.queue = <span class="literal">undefined</span>;
+    <span class="keyword">if</span>(<span class="keyword">this</span>.openQueue) <span class="keyword">this</span>.openQueue.shutdown();
+    <span class="keyword">this</span>.openQueue = <span class="literal">undefined</span>;
     <span class="keyword">this</span>.push = <span class="keyword">this</span>.pushOne = <span class="keyword">function</span>() { <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Queue already closed'</span>); };
     <span class="keyword">if</span>(<span class="keyword">this</span>.namespace) <span class="keyword">this</span>.namespace.clearQueue(<span class="keyword">this</span>);
-    <span class="keyword">if</span>(tempHandler <span class="keyword">instanceof</span> Function) {
-        tempHandler(<span class="string">'kill'</span>);
+    <span class="keyword">if</span>(<span class="keyword">this</span>.ender <span class="keyword">instanceof</span> Function) {
+        <span class="keyword">this</span>.ender(<span class="string">'kill'</span>);
     }
 };</pre></div></div>
             
@@ -496,19 +504,17 @@ method.</p>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.each = <span class="function"><span class="keyword">function</span> <span class="title">each</span><span class="params">(callback)</span> {</span>
     <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.options, <span class="keyword">this</span>.namespace);
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(!next) {
-            outQueue[value]();
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+        <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
+            callback(value, <span class="keyword">function</span>() {
+                self.handlerCallback(struct, outQueue.push.bind(outQueue, value));
+            });
         } <span class="keyword">else</span> {
-            <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
-                callback(value, <span class="keyword">function</span>() {
-                    next(outQueue.push.bind(outQueue, value));
-                });
-            } <span class="keyword">else</span> {
-                callback(value);
-                next(outQueue.push.bind(outQueue, value));
-            }
+            callback(value);
+            self.handlerCallback(struct, outQueue.push.bind(outQueue, value));
         }
+    }, <span class="keyword">function</span>(end) {
+        outQueue[end]();
     });
     <span class="keyword">return</span> outQueue;
 };
@@ -564,18 +570,16 @@ take an input queue and produce an output queue.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> inOut = <span class="function"><span class="keyword">function</span> <span class="title">inOut</span><span class="params">(outQueue, setter, callback)</span> {</span>
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(!next) {
-            outQueue[value]();
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+        <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
+            callback(value, <span class="keyword">function</span>(result) {
+                self.handlerCallback(struct, setter.bind(<span class="keyword">this</span>, value, result));
+            });
         } <span class="keyword">else</span> {
-            <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
-                callback(value, <span class="keyword">function</span>(result) {
-                    next(setter.bind(<span class="keyword">this</span>, value, result));
-                });
-            } <span class="keyword">else</span> {
-                next(setter.bind(<span class="keyword">this</span>, value, callback(value)));
-            }
+            self.handlerCallback(struct, setter.bind(<span class="keyword">this</span>, value, callback(value)));
         }
+    }, <span class="keyword">function</span>(end) {
+        outQueue[end]();
     });
     <span class="keyword">return</span> outQueue;
 };</pre></div></div>
@@ -599,26 +603,22 @@ to process the input queue</p>
             <div class="content"><div class='highlight'><pre>Q.prototype.map = <span class="function"><span class="keyword">function</span> <span class="title">map</span><span class="params">(callback)</span> {</span>
     <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.options, <span class="keyword">this</span>.namespace);
     <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
-        <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-            <span class="keyword">if</span>(!next) {
-                outQueue[value]();
-            } <span class="keyword">else</span> {
-                callback(value, <span class="keyword">function</span>(result) {
-                    next(<span class="keyword">function</span>() {
-                        outQueue.pushOne(result);
-                    });
+        <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+            callback(value, <span class="keyword">function</span>(result) {
+                self.handlerCallback(struct, <span class="keyword">function</span>() {
+                    outQueue.pushOne(result);
                 });
-            }
+            });
+        }, <span class="keyword">function</span>(end) {
+            outQueue[end]();
         });
     } <span class="keyword">else</span> {
-        <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-            <span class="keyword">if</span>(!next) {
-                outQueue[value]();
-            } <span class="keyword">else</span> {
-                next(<span class="keyword">function</span>() {
-                    outQueue.pushOne(callback(value));
-                });
-            }
+        <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
+                outQueue.pushOne(callback(value));
+            });
+        }, <span class="keyword">function</span>(end) {
+            outQueue[end]();
         });
     }
     <span class="keyword">return</span> outQueue;
@@ -649,28 +649,26 @@ the <code>out</code> value.</p>
     <span class="keyword">var</span> out = initial;
     <span class="keyword">var</span> outQueue;
     <span class="keyword">if</span>(!last) outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.options, <span class="keyword">this</span>.namespace);
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(!next) {
-            <span class="keyword">if</span>(!!last &amp;&amp; last <span class="keyword">instanceof</span> Function) last(out);
-            <span class="keyword">if</span>(!!last &amp;&amp; <span class="keyword">typeof</span>(last) === <span class="string">'string'</span>) q(last).push(out);
-            <span class="keyword">if</span>(!last) {
-                outQueue.push(out);
-                outQueue[value]();
-            }
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+        <span class="keyword">if</span>(isAsync(callback, <span class="number">3</span>)) {
+            callback(out, value, <span class="keyword">function</span>(result) {
+                self.handlerCallback(struct, <span class="keyword">function</span>() {
+                    out = result;
+                });
+            });
         } <span class="keyword">else</span> {
-            <span class="keyword">if</span>(isAsync(callback, <span class="number">3</span>)) {
-                callback(out, value, <span class="keyword">function</span>(result) {
-                    next(<span class="keyword">function</span>() {
-                        out = result;
-                    });
-                });
-            } <span class="keyword">else</span> {
-                next(<span class="keyword">function</span>() {
-                    out = callback(out, value);
-                });
-            }
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
+                out = callback(out, value);
+            });
         }
-    }.bind(<span class="keyword">this</span>));
+    }, <span class="keyword">function</span>(end) {
+        <span class="keyword">if</span>(!!last &amp;&amp; last <span class="keyword">instanceof</span> Function) last(out);
+        <span class="keyword">if</span>(!!last &amp;&amp; <span class="keyword">typeof</span>(last) === <span class="string">'string'</span>) q(last).push(out);
+        <span class="keyword">if</span>(!last) {
+            outQueue.push(out);
+            outQueue[end]();
+        }
+    });
     <span class="keyword">return</span> outQueue || <span class="keyword">this</span>;
 };
 Q.prototype.reduceAsync = makeAsync(Q.prototype.reduce);
@@ -719,7 +717,7 @@ of either to push the value into.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.branch = <span class="function"><span class="keyword">function</span> <span class="title">branch</span><span class="params">(callback)</span> {</span>
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
         <span class="function"><span class="keyword">function</span> <span class="title">queueProcessor</span><span class="params">(queue)</span> {</span>
             <span class="keyword">if</span>(<span class="keyword">typeof</span>(queue) === <span class="string">'string'</span>) {
                 q(queue).push(value);
@@ -727,35 +725,33 @@ of either to push the value into.</p>
                 queue.push(value);
             }
         }
-        <span class="keyword">if</span>(!!next) {
-            <span class="keyword">if</span>(<span class="keyword">typeof</span>(callback) === <span class="string">'function'</span> &amp;&amp; isAsync(callback, <span class="number">2</span>)) {
-                callback(value, <span class="keyword">function</span>(result) {
-                    next(<span class="keyword">function</span>() {
-                        <span class="keyword">if</span>(result <span class="keyword">instanceof</span> Array) {
-                            result.forEach(queueProcessor);
-                        } <span class="keyword">else</span> {
-                            queueProcessor(result);
-                        }
-                    });
-                });
-            } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span>(callback) === <span class="string">'function'</span>) {
-                <span class="keyword">var</span> result = callback(value);
-                next(<span class="keyword">function</span>() {
+        <span class="keyword">if</span>(<span class="keyword">typeof</span>(callback) === <span class="string">'function'</span> &amp;&amp; isAsync(callback, <span class="number">2</span>)) {
+            callback(value, <span class="keyword">function</span>(result) {
+                self.handlerCallback(struct, <span class="keyword">function</span>() {
                     <span class="keyword">if</span>(result <span class="keyword">instanceof</span> Array) {
                         result.forEach(queueProcessor);
                     } <span class="keyword">else</span> {
                         queueProcessor(result);
                     }
                 });
-            } <span class="keyword">else</span> <span class="keyword">if</span>(callback <span class="keyword">instanceof</span> Array) {
-                next(<span class="keyword">function</span>() {
-                    callback.forEach(queueProcessor);
-                });
-            } <span class="keyword">else</span> {
-                next(<span class="keyword">function</span>() {
-                    queueProcessor(callback);
-                });
-            }
+            });
+        } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span>(callback) === <span class="string">'function'</span>) {
+            <span class="keyword">var</span> result = callback(value);
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
+                <span class="keyword">if</span>(result <span class="keyword">instanceof</span> Array) {
+                    result.forEach(queueProcessor);
+                } <span class="keyword">else</span> {
+                    queueProcessor(result);
+                }
+            });
+        } <span class="keyword">else</span> <span class="keyword">if</span>(callback <span class="keyword">instanceof</span> Array) {
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
+                callback.forEach(queueProcessor);
+            });
+        } <span class="keyword">else</span> {
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
+                queueProcessor(callback);
+            });
         }
     });
     <span class="keyword">return</span> <span class="keyword">this</span>;
@@ -781,34 +777,13 @@ will change whether <code>last</code> is a function, a string, or falsy.</p>
             <div class="content"><div class='highlight'><pre><span class="keyword">var</span> everySome = <span class="function"><span class="keyword">function</span> <span class="title">everySome</span><span class="params">(polarity, callback, last)</span> {</span>
     <span class="keyword">var</span> outQueue;
     <span class="keyword">if</span>(!last) outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.options, <span class="keyword">this</span>.namespace);
-    <span class="function"><span class="keyword">function</span> <span class="title">shortCircuit</span><span class="params">(value, next)</span> {</span> <span class="keyword">if</span>(!!next) next(<span class="keyword">function</span>() {}); }
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(!next) {
-            <span class="keyword">if</span>(!last) {
-                outQueue.push(!polarity);
-                outQueue.close();
-            }
-            <span class="keyword">if</span>(!!last &amp;&amp; last <span class="keyword">instanceof</span> Function) last(!polarity); <span class="comment">// Reverse the polarity on the deflector shield!</span>
-            <span class="keyword">if</span>(!!last &amp;&amp; <span class="keyword">typeof</span>(last) === <span class="string">'string'</span>) q(last).push(!polarity);
-        } <span class="keyword">else</span> {
-            <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
-                callback(value, <span class="keyword">function</span>(result) {
-                    next(<span class="keyword">function</span>() {
-                        <span class="keyword">if</span>(result === polarity) {
-                            <span class="keyword">this</span>.setHandler(shortCircuit);
-                            <span class="keyword">if</span>(!last) {
-                                outQueue.push(polarity);
-                                outQueue.close();
-                            }
-                            <span class="keyword">if</span>(!!last &amp;&amp; last <span class="keyword">instanceof</span> Function) last(polarity);
-                            <span class="keyword">if</span>(!!last &amp;&amp; <span class="keyword">typeof</span>(last) === <span class="string">'string'</span>) q(last).push(polarity);
-                        }
-                    }.bind(<span class="keyword">this</span>));
-                }.bind(<span class="keyword">this</span>));
-            } <span class="keyword">else</span> {
-                next(<span class="keyword">function</span>() {
-                    <span class="keyword">if</span>(callback(value) === polarity) {
-                        <span class="keyword">this</span>.setHandler(shortCircuit);
+    <span class="function"><span class="keyword">function</span> <span class="title">shortCircuit</span><span class="params">(self, value, struct)</span> {</span> self.handlerCallback(struct, <span class="keyword">function</span>() {}); }
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+        <span class="keyword">if</span>(isAsync(callback, <span class="number">2</span>)) {
+            callback(value, <span class="keyword">function</span>(result) {
+                self.handlerCallback(struct, <span class="keyword">function</span>() {
+                    <span class="keyword">if</span>(result === polarity) {
+                        <span class="keyword">this</span>.setHandlers(shortCircuit, <span class="keyword">function</span>() {});
                         <span class="keyword">if</span>(!last) {
                             outQueue.push(polarity);
                             outQueue.close();
@@ -817,9 +792,28 @@ will change whether <code>last</code> is a function, a string, or falsy.</p>
                         <span class="keyword">if</span>(!!last &amp;&amp; <span class="keyword">typeof</span>(last) === <span class="string">'string'</span>) q(last).push(polarity);
                     }
                 }.bind(<span class="keyword">this</span>));
-            }
+            }.bind(<span class="keyword">this</span>));
+        } <span class="keyword">else</span> {
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
+                <span class="keyword">if</span>(callback(value) === polarity) {
+                    <span class="keyword">this</span>.setHandlers(shortCircuit, <span class="keyword">function</span>() {});
+                    <span class="keyword">if</span>(!last) {
+                        outQueue.push(polarity);
+                        outQueue.close();
+                    }
+                    <span class="keyword">if</span>(!!last &amp;&amp; last <span class="keyword">instanceof</span> Function) last(polarity);
+                    <span class="keyword">if</span>(!!last &amp;&amp; <span class="keyword">typeof</span>(last) === <span class="string">'string'</span>) q(last).push(polarity);
+                }
+            }.bind(<span class="keyword">this</span>));
         }
-    }.bind(<span class="keyword">this</span>));
+    }.bind(<span class="keyword">this</span>), <span class="keyword">function</span>(end) {
+        <span class="keyword">if</span>(!last) {
+            outQueue.push(!polarity);
+            outQueue[end]();
+        }
+        <span class="keyword">if</span>(!!last &amp;&amp; last <span class="keyword">instanceof</span> Function) last(!polarity); <span class="comment">// Reverse the polarity on the deflector shield!</span>
+        <span class="keyword">if</span>(!!last &amp;&amp; <span class="keyword">typeof</span>(last) === <span class="string">'string'</span>) q(last).push(!polarity);
+    });
     <span class="keyword">return</span> outQueue || <span class="keyword">this</span>;
 };</pre></div></div>
             
@@ -882,17 +876,15 @@ falsy.</p>
     } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span> last === <span class="string">'string'</span>) {
         outQueue = q(last);
     }
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(next) {
-            next(<span class="keyword">function</span>() {
-                outArr.push(value);
-            });
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+        self.handlerCallback(struct, <span class="keyword">function</span>() {
+            outArr.push(value);
+        });
+    }, <span class="keyword">function</span>(end) {
+        <span class="keyword">if</span>(<span class="keyword">typeof</span> last === <span class="string">'function'</span>) {
+            last(outArr);
         } <span class="keyword">else</span> {
-            <span class="keyword">if</span>(<span class="keyword">typeof</span> last === <span class="string">'function'</span>) {
-                last(outArr);
-            } <span class="keyword">else</span> {
-                outQueue.pushOne(outArr)[value]();
-            }
+            outQueue.pushOne(outArr)[end]();
         }
     });
     <span class="keyword">if</span>(!<span class="keyword">this</span>.wasName) <span class="keyword">this</span>.close();
@@ -928,14 +920,12 @@ flatten to (<code>true</code> == 1 in this case). Intended to be nearly identica
         }
     }
 
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(!next) {
-            outQueue[value]();
-        } <span class="keyword">else</span> {
-            next(<span class="keyword">function</span>() {
-                processValue(value, <span class="number">0</span>);
-            });
-        }
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+        self.handlerCallback(struct, <span class="keyword">function</span>() {
+            processValue(value, <span class="number">0</span>);
+        });
+    }, <span class="keyword">function</span>(end) {
+        outQueue[end]();
     });
     <span class="keyword">return</span> outQueue;
 };</pre></div></div>
@@ -956,21 +946,21 @@ callback function with significant error logic, depending on what value is passe
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="comment">/* jshint maxparams: 6 */</span>
-<span class="function"><span class="keyword">function</span> <span class="title">ercb</span><span class="params">(outQueue, onError, next, value, error, result)</span> {</span>
+            <div class="content"><div class='highlight'><pre><span class="comment">/* jshint maxparams: 7 */</span>
+<span class="function"><span class="keyword">function</span> <span class="title">ercb</span><span class="params">(outQueue, onError, self, value, struct, error, result)</span> {</span>
     <span class="keyword">if</span>(!error) {
-        next(<span class="keyword">function</span>() {
+        self.handlerCallback(struct, <span class="keyword">function</span>() {
             outQueue.push(result);
         });
     } <span class="keyword">else</span> {
         <span class="keyword">if</span>(!!onError &amp;&amp; onError <span class="keyword">instanceof</span> Function) {
             onError(error, result, value);
         } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span>(onError) === <span class="string">'string'</span>) {
-            next(<span class="keyword">function</span>() {
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
                 q(onError).push([error, result, value]);
             });
         } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span>(onError) === <span class="string">'object'</span>) { <span class="comment">// Assume a queue-flow constructed object</span>
-            next(<span class="keyword">function</span>() {
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
                 onError.push([error, result, value]);
             });
         }
@@ -1002,23 +992,21 @@ also provided.</p>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.node = <span class="function"><span class="keyword">function</span> <span class="title">node</span><span class="params">(callback, onError)</span> {</span>
     <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.options, <span class="keyword">this</span>.namespace);
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(q, value, struct) {
         <span class="keyword">if</span>(!(value <span class="keyword">instanceof</span> Array)) value = [value];
-        <span class="keyword">if</span>(!next) {
-            outQueue[value]();
+        <span class="keyword">if</span>(isAsync(callback, value.length+<span class="number">1</span>)) {
+            value.push(ercb.bind(<span class="keyword">this</span>, outQueue, onError, q, value, struct));
+            callback.apply(<span class="keyword">this</span>, value);
         } <span class="keyword">else</span> {
-            <span class="keyword">if</span>(isAsync(callback, value.length+<span class="number">1</span>)) {
-                value.push(ercb.bind(<span class="keyword">this</span>, outQueue, onError, next, value));
-                callback.apply(<span class="keyword">this</span>, value);
-            } <span class="keyword">else</span> {
-                <span class="keyword">try</span> {
-                    ercb.bind(<span class="keyword">this</span>)(outQueue, onError, next, value, <span class="literal">undefined</span>, callback.apply(<span class="keyword">this</span>, value));
-                } <span class="keyword">catch</span>(e) {
-                    ercb.bind(<span class="keyword">this</span>)(outQueue, onError, next, value, e);
-                }
+            <span class="keyword">try</span> {
+                ercb.bind(<span class="keyword">this</span>)(outQueue, onError, q, value, struct, <span class="literal">undefined</span>, callback.apply(<span class="keyword">this</span>, value));
+            } <span class="keyword">catch</span>(e) {
+                ercb.bind(<span class="keyword">this</span>)(outQueue, onError, q, value, struct, e);
             }
         }
-    }.bind(<span class="keyword">this</span>));
+    }.bind(<span class="keyword">this</span>), <span class="keyword">function</span>(end) {
+        outQueue[end]();
+    });
     <span class="keyword">return</span> outQueue;
 };
 Q.prototype.nodeAsync = makeAsync(Q.prototype.node);
@@ -1042,18 +1030,17 @@ similar to <code>node</code> above. <code>execCommon</code> is the base for all 
             
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">execCommon</span><span class="params">(forceSyncAsync, args, onError)</span> {</span>
     <span class="keyword">var</span> outQueue = <span class="keyword">new</span> <span class="keyword">this</span>.constructor(<span class="literal">null</span>, <span class="keyword">this</span>.options, <span class="keyword">this</span>.namespace);
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(!next) <span class="keyword">return</span> outQueue[value]();
-        <span class="keyword">if</span>(!(value <span class="keyword">instanceof</span> Function)) <span class="keyword">return</span> ercb(outQueue, onError, next, value, <span class="keyword">new</span> Error(<span class="string">'Not a function'</span>), <span class="literal">undefined</span>);
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(q, value, struct) {
+        <span class="keyword">if</span>(!(value <span class="keyword">instanceof</span> Function)) <span class="keyword">return</span> ercb(outQueue, onError, q, value, struct, <span class="keyword">new</span> Error(<span class="string">'Not a function'</span>), <span class="literal">undefined</span>);
         <span class="function"><span class="keyword">function</span> <span class="title">execFunc</span><span class="params">(args)</span> {</span>
             <span class="keyword">if</span>(forceSyncAsync === <span class="string">'async'</span> || (forceSyncAsync !== <span class="string">'sync'</span> &amp;&amp; isAsync(value, args.length+<span class="number">1</span>))) {
-                args.push(ercb.bind(<span class="keyword">this</span>, outQueue, onError, next, value));
+                args.push(ercb.bind(<span class="keyword">this</span>, outQueue, onError, q, value, struct));
                 value.apply(<span class="keyword">this</span>, args);
             } <span class="keyword">else</span> {
                 <span class="keyword">try</span> {
-                    ercb(outQueue, onError, next, value, <span class="literal">undefined</span>, value.apply(<span class="keyword">this</span>, args));
+                    ercb(outQueue, onError, q, value, struct, <span class="literal">undefined</span>, value.apply(<span class="keyword">this</span>, args));
                 } <span class="keyword">catch</span>(e) {
-                    ercb(outQueue, onError, next, value, e);
+                    ercb(outQueue, onError, q, value, struct, e);
                 }
             }
         }
@@ -1067,14 +1054,16 @@ similar to <code>node</code> above. <code>execCommon</code> is the base for all 
                 args2 = args2 <span class="keyword">instanceof</span> Array ? args2 : [args2];
                 execFunc.bind(<span class="keyword">this</span>)(args2);
             } <span class="keyword">catch</span>(e) {
-                ercb.bind(<span class="keyword">this</span>)(outQueue, onError, next, value, e);
+                ercb.bind(<span class="keyword">this</span>)(outQueue, onError, q, value, struct, e);
             }
         } <span class="keyword">else</span> <span class="keyword">if</span>(args <span class="keyword">instanceof</span> Array) {
             execFunc.bind(<span class="keyword">this</span>)(args);
         } <span class="keyword">else</span> {
             execFunc.bind(<span class="keyword">this</span>)([args]);
         }
-    }.bind(<span class="keyword">this</span>));
+    }.bind(<span class="keyword">this</span>), <span class="keyword">function</span>(end) {
+        outQueue[end]();
+    });
     <span class="keyword">return</span> outQueue;
 }
 Q.prototype.exec = <span class="function"><span class="keyword">function</span> <span class="title">exec</span><span class="params">(args, onError)</span> {</span>
@@ -1146,14 +1135,15 @@ and the failures into the specified error queue or callback. Promises are, by de
     } <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span>(error) !== <span class="string">'function'</span>) {
         error = <span class="keyword">function</span>() {};
     }
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(!next) <span class="keyword">return</span> outQueue[value]();
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
         <span class="keyword">if</span>(!(value <span class="keyword">instanceof</span> Array)) value = [value];
         callback.apply(<span class="keyword">this</span>, value).then(<span class="keyword">function</span>(result) {
-            next(<span class="keyword">function</span>() {
+            self.handlerCallback(struct, <span class="keyword">function</span>() {
                 outQueue.push(result);
             });
         }, error);
+    }, <span class="keyword">function</span>(end) {
+        outQueue[end]();
     });
     <span class="keyword">return</span> outQueue;
 };
@@ -1177,11 +1167,12 @@ an error if it can&#39;t find the <code>write</code> and <code>end</code> method
             
             <div class="content"><div class='highlight'><pre>Q.prototype.pipe = <span class="function"><span class="keyword">function</span> <span class="title">pipe</span><span class="params">(writable)</span> {</span>
     <span class="keyword">if</span>(<span class="keyword">typeof</span>(writable.write) !== <span class="string">'function'</span> || <span class="keyword">typeof</span>(writable.end) !== <span class="string">'function'</span>) <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Not a valid writeable object!'</span>);
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(!next) <span class="keyword">return</span> writable.end();
-        next(<span class="keyword">function</span>() {
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+        self.handlerCallback(struct, <span class="keyword">function</span>() {
             writable.write(value);
         });
+    }, <span class="keyword">function</span>() {
+        writable.end();
     });
     <span class="keyword">return</span> writable;
 };</pre></div></div>
@@ -1203,8 +1194,8 @@ after this call (for obvious reasons).</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>Q.prototype.drain = <span class="function"><span class="keyword">function</span> <span class="title">drain</span><span class="params">()</span> {</span>
-    <span class="keyword">this</span>.setHandler(<span class="keyword">function</span>(value, next) {
-        <span class="keyword">if</span>(next &amp;&amp; next <span class="keyword">instanceof</span> Function) next(<span class="keyword">function</span>() {});
+    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
+        self.handlerCallback(struct, <span class="keyword">function</span>() {});
     });
     <span class="keyword">return</span> <span class="literal">undefined</span>;
 };

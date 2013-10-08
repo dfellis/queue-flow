@@ -858,7 +858,7 @@ exports.promise = function(test) {
         .promise(simplePromise)
         .each(function(val) {
             test.equal(val, 1, 'the valid value goes in');
-            test.done();
+            q([val]).promise(simplePromise, 'error').on('close', function() { test.done(); });
         });
     q('error')
         .each(function(val) {

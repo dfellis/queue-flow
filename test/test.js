@@ -866,17 +866,24 @@ exports.promise = function(test) {
         });
 };
 
-exports.drain = function(test) {
+exports.autoDrain = function(test) {
     bootstrap(test);
-    test.expect(2);
-    var drainOutput = q([1])
-        .each(function(value) {
-            test.expect(1, value, 'the values are being passed on to the drain method');
-        })
-        .on('close', function() {
-            test.done();
-        }).drain();
-    test.equal(undefined, drainOutput, 'drain returns nothing');
+    test.expect(1);
+    var drainOutput = q([1, 2, 3]);
+    setTimeout(function() {
+        test.equal(undefined, drainOutput.queue, 'all of the queued elements automatically drained');
+        test.done();
+    }, 100);
+};
+
+exports.plug = function(test) {
+    bootstrap(test);
+    test.expect(1);
+    var pluggedOutput = q([1, 2, 3]).plug();
+    setTimeout(function() {
+        test.equal(3, pluggedOutput.queue.length, 'all of the queued elements have remained');
+        test.done();
+    }, 100);
 };
 
 exports.nodeShortCircuit = function(test) {

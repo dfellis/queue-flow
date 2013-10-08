@@ -133,9 +133,11 @@ async or sync methods, suggested by a colleague, and fits better in the
         }
     }
     <span class="keyword">this</span>.openQueue = <span class="keyword">new</span> Infiniqueue();
-    <span class="keyword">this</span>.handler = <span class="keyword">function</span>() {};
+    <span class="keyword">this</span>.handler = <span class="keyword">function</span>(self, value, struct) {
+        self.handlerCallback(struct, <span class="keyword">function</span>() {});
+    };
     <span class="keyword">this</span>.ender = <span class="keyword">function</span>() {};
-    <span class="keyword">this</span>.handlerSet = <span class="literal">false</span>;
+    <span class="keyword">this</span>.handlerSet = <span class="literal">true</span>;
     <span class="keyword">this</span>.handlerRuns = <span class="number">0</span>;</pre></div></div>
             
         </li>
@@ -147,15 +149,21 @@ async or sync methods, suggested by a colleague, and fits better in the
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>Privileged methods</p>
-<p>For node 0.6 and 0.8 compatibility, listen for the <code>pipe</code> event and register
+              <p>For node 0.6 and 0.8 compatibility, listen for the <code>pipe</code> event and register
 an event handler to call <code>push</code></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.on(<span class="string">'pipe'</span>, <span class="keyword">function</span>(piper) {
         piper.on(<span class="string">'data'</span>, <span class="keyword">this</span>.push.bind(<span class="keyword">this</span>));
-    }.bind(<span class="keyword">this</span>));</pre></div></div>
+    }.bind(<span class="keyword">this</span>));
+
+    <span class="keyword">if</span>(<span class="keyword">this</span>.queue.length &gt; <span class="number">0</span>) <span class="keyword">this</span>.on(<span class="string">'empty'</span>, <span class="keyword">this</span>.close.bind(<span class="keyword">this</span>));
+    nextTick(<span class="keyword">this</span>.enqueueParallelism.bind(<span class="keyword">this</span>));
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+}
+
+util.inherits(Q, EventEmitter);</pre></div></div>
             
         </li>
         
@@ -165,27 +173,6 @@ an event handler to call <code>push</code></p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p>Start processing the queue after the next JS event loop cycle and return the queue
-object to the remaining code.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>.enqueueParallelism();
-    <span class="keyword">if</span>(<span class="keyword">this</span>.queue.length &gt; <span class="number">0</span>) <span class="keyword">this</span>.on(<span class="string">'empty'</span>, <span class="keyword">this</span>.close.bind(<span class="keyword">this</span>));
-    <span class="keyword">return</span> <span class="keyword">this</span>;
-}
-
-util.inherits(Q, EventEmitter);</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p><code>setHandler</code> defines the special function to call to process the queue
 assumed to be ready initially, when called marked busy, call provided callback to
@@ -204,11 +191,11 @@ mark ready again.</p>
         </li>
         
         
-        <li id="section-8">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>The <code>handlerCallback</code> is provided to the handler along with the dequeued value.
 If there is more work to be done, it continues, otherwise is marks the handler
@@ -242,11 +229,11 @@ as ready for when the data next arrives</p>
         </li>
         
         
-        <li id="section-9">
+        <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p><code>enqueueParallelism</code> loads the next item or items for processing</p>
 
@@ -260,11 +247,11 @@ as ready for when the data next arrives</p>
         </li>
         
         
-        <li id="section-10">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>Javascript treats assignments of objects as pass-by-reference,
 so this seemingly unnecessary single-property object allows
@@ -291,11 +278,11 @@ creating an explicit id</p>
         </li>
         
         
-        <li id="section-11">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>Inserts a specified value into the queue, if allowed by the event handlers, and
 calls the special handler function, if it&#39;s ready.</p>
@@ -313,11 +300,11 @@ calls the special handler function, if it&#39;s ready.</p>
         </li>
         
         
-        <li id="section-12">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p><code>write</code> is a synonym for <code>push</code> so a queue can be treated as a writeable stream</p>
 
@@ -334,11 +321,11 @@ Q.prototype.pushOne = <span class="function"><span class="keyword">function</spa
         </li>
         
         
-        <li id="section-13">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>Signals that the queue is being destroyed and then, if allowed, destroys it</p>
 
@@ -351,11 +338,11 @@ Q.prototype.pushOne = <span class="function"><span class="keyword">function</spa
         </li>
         
         
-        <li id="section-14">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Stop accepting new items so the queue can actually close
 if processing time is slower than newly enqueued values come in</p>
@@ -368,11 +355,11 @@ if processing time is slower than newly enqueued values come in</p>
         </li>
         
         
-        <li id="section-15">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Whatever made it into the queue at this point in time, allow it to be
 processed and de-queued.</p>
@@ -406,11 +393,11 @@ processed and de-queued.</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p><code>end</code> is a synonym for <code>close</code> so a queue can be treated as a writeable stream</p>
 
@@ -421,11 +408,11 @@ processed and de-queued.</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Kills the queue (and all sub-queues) immediately, no possibility of blocking
 with an event handler.</p>
@@ -450,11 +437,11 @@ with an event handler.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <h2><code>Q</code> prototype methods, the methods to be most commonly used by users of <code>queue-flow</code></h2>
 <p><code>as</code> names or aliases the given queue</p>
@@ -469,11 +456,11 @@ with an event handler.</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p><code>concat</code> is a simpler wrapper around <code>push</code> that takes a single array
 and covers up the relatively nasty <code>apply</code> mechanism (when dealing with
@@ -491,11 +478,11 @@ is ugly and verbose.</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p><code>each</code> creates an output queue that simply copies the input queue results,
 while also passing these results to the provided callback for side-effect
@@ -530,11 +517,11 @@ Q.prototype.eachSync = makeSync(Q.prototype.each);</pre></div></div>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p><code>wait</code> is a no-op <code>each</code> that simply delays the queue by a specified amount
 or by the amount specified by the callback function (if the argument is a
@@ -566,11 +553,11 @@ Q.prototype.waitSync = makeSync(Q.prototype.wait);</pre></div></div>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p><code>inOut</code> is a helper function used by several of the Q prototype methods that
 take an input queue and produce an output queue.</p>
@@ -599,11 +586,11 @@ take an input queue and produce an output queue.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p><code>map</code> creates an output queue, and executes
 the given callback on each value, pushing the
@@ -641,11 +628,11 @@ Q.prototype.mapSync = makeSync(Q.prototype.map);</pre></div></div>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p><code>reduce</code> creates an output variable, and executes once upstream has
 <code>close()</code>d, it does one of three things, depending on the value of
@@ -692,11 +679,11 @@ Q.prototype.reduceSync = makeSync(Q.prototype.reduce);</pre></div></div>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p><code>filter</code> creates an output queue, and executes
 the given callback on each value, pushing the
@@ -716,11 +703,11 @@ Q.prototype.filterSync = makeSync(Q.prototype.filter);</pre></div></div>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p><code>branch</code> pushes values from the queue into another queue. If that name
 is provided directly to <code>branch</code> it will always push to that named queue.
@@ -777,11 +764,11 @@ Q.prototype.branchSync = makeSync(Q.prototype.branch);</pre></div></div>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p><code>everySome</code> helper function that is used to implement <code>Q.prototype.every</code>
 and <code>Q.prototype.some</code>, similar to <code>reduce</code>, the behavior of <code>everySome</code>
@@ -835,11 +822,11 @@ will change whether <code>last</code> is a function, a string, or falsy.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p><code>every</code> returns true only if the callback has returned true every time. Immediately returns false
 when false and closes the input queue in this event. A specialization of the <code>reduce</code> method.</p>
@@ -853,11 +840,11 @@ Q.prototype.everySync = makeSync(Q.prototype.every);</pre></div></div>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p><code>some</code> returns true only if the callback has returned true at least once. Immediately returns true
 when true and closes the input queue in this event.</p>
@@ -871,11 +858,11 @@ Q.prototype.someSync = makeSync(Q.prototype.some);</pre></div></div>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p><code>toArray</code> returns an array from the given queue. A specialization of the <code>reduce</code> method.
 Has the same three behaviors depending on the type of value <code>last</code> is, function, string, or
@@ -907,11 +894,11 @@ falsy.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p><code>flatten</code> takes an input queue and produces an output queue of values that are not arrays. Any
 array encountered is split and enqueued into the new queue recursively, unless given a depth to
@@ -946,11 +933,11 @@ flatten to (<code>true</code> == 1 in this case). Intended to be nearly identica
         </li>
         
         
-        <li id="section-32">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p><code>shortCiruit</code> and <code>ercb</code> are functions common to both the <code>node</code> and <code>exec</code> methods below.
 <code>shortCircuit</code> consumes the remaining queue without doing any processing, and <code>ercb</code> is a
@@ -983,11 +970,11 @@ callback function with significant error logic, depending on what value is passe
         </li>
         
         
-        <li id="section-33">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p><code>node</code> is a slightly modified version of <code>map</code> that takes the input value, and if it is an
 array, provides each value as an independent argument to the provided callback. It also assumes
@@ -1028,11 +1015,11 @@ Q.prototype.nodeSync = makeSync(Q.prototype.node);</pre></div></div>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p><code>exec</code> assumes the incoming value is a function to execute and takes a couple of arguments.
 The first is an array of arguments for the function, or a function that returns an array of
@@ -1092,11 +1079,11 @@ Q.prototype.execAsync = <span class="function"><span class="keyword">function</s
         </li>
         
         
-        <li id="section-35">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p><code>subqueue</code> allows re-usable queue definitions to be attached to the parent queue. An
 anonymous queue is provided to the callback function, and that function must return the
@@ -1125,11 +1112,11 @@ Q.prototype.subqueueAsync = makeAsync(Q.prototype.subqueue);</pre></div></div>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p><code>promise</code> allows the usage of CommonJS Promises in queues. It takes a function that uses
 the value or values passed in as the arguments for the construction of the promise, and
@@ -1166,11 +1153,11 @@ Q.prototype.promiseSync = <span class="keyword">function</span>() { <span class=
         </li>
         
         
-        <li id="section-37">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p><code>pipe</code> pushes the queue results into the provided writeable object (and returns it so
 if it is also readable, you can continue to <code>pipe</code> it just as you&#39;d expect). Throws
@@ -1193,24 +1180,23 @@ an error if it can&#39;t find the <code>write</code> and <code>end</code> method
         </li>
         
         
-        <li id="section-38">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
-              <p><code>drain</code> is a simple callback that empties the attached queue and throws away the
-results. This is useful for long-running queues to eliminate references to effectively
-&quot;dead&quot; data without using the <code>reduce</code> hack to do so. No chaining is possible
-after this call (for obvious reasons).</p>
+              <p><code>plug</code> is a simple callback that &quot;plugs up&quot; the queue if nothing has been defined to
+process the incoming data. Useful if you don&#39;t (yet) know what method you&#39;ll run on it,
+though this should be a very rare occasion.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>Q.prototype.drain = <span class="function"><span class="keyword">function</span> <span class="title">drain</span><span class="params">()</span> {</span>
-    <span class="keyword">this</span>.setHandlers(<span class="keyword">function</span>(self, value, struct) {
-        self.handlerCallback(struct, <span class="keyword">function</span>() {});
-    });
-    <span class="keyword">return</span> <span class="literal">undefined</span>;
+            <div class="content"><div class='highlight'><pre>Q.prototype.plug = <span class="function"><span class="keyword">function</span> <span class="title">plug</span><span class="params">()</span> {</span>
+    <span class="keyword">this</span>.handlerSet = <span class="literal">false</span>;
+    <span class="keyword">this</span>.handler = <span class="keyword">function</span>() {};
+    <span class="keyword">this</span>.ender = <span class="keyword">function</span>() {};
+    <span class="keyword">return</span> <span class="keyword">this</span>;
 };
 
 <span class="function"><span class="keyword">function</span> <span class="title">ns</span><span class="params">()</span> {</span>
@@ -1219,11 +1205,11 @@ after this call (for obvious reasons).</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>Determines if this queue has a name, and either finds or returns said named queue,
 or decides it&#39;s an unnamed queue and returns said queue.</p>
@@ -1254,11 +1240,11 @@ or decides it&#39;s an unnamed queue and returns said queue.</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p><code>exists</code> returns whether or not a named queue exists in</p>
 
@@ -1271,11 +1257,11 @@ or decides it&#39;s an unnamed queue and returns said queue.</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p><code>clearQueue</code> removes a queue from a q environment</p>
 
@@ -1294,11 +1280,11 @@ or decides it&#39;s an unnamed queue and returns said queue.</p>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p><code>addQueue</code> adds a queue to a q environment</p>
 
@@ -1311,11 +1297,11 @@ or decides it&#39;s an unnamed queue and returns said queue.</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p><code>tuple</code> converts an object into an array of arrays. The arrays are tuples of the
 key-value pairs from the object, so they can be processed individually in a queue-flow
@@ -1330,11 +1316,11 @@ if desired, rather than considering the whole object as a single item in the que
         </li>
         
         
-        <li id="section-44">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>Create a new queue-flow environment/namespace</p>
 
@@ -1345,11 +1331,11 @@ if desired, rather than considering the whole object as a single item in the que
         </li>
         
         
-        <li id="section-45">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>Expose the <code>Q</code> constructor function so third parties can extend its prototype</p>
 
@@ -1360,11 +1346,11 @@ if desired, rather than considering the whole object as a single item in the que
         </li>
         
         
-        <li id="section-46">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <h2>Methods of <code>q</code>, mostly helper functions for users of <code>queue-flow</code> and the <code>Q</code> methods</h2>
 

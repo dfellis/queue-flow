@@ -80,10 +80,10 @@ exports.reduce = function(test) {
     q([1, 2, 3])
         .reduce(function(prev, curr) {
             return prev + curr;
-        }, function(result) {
+        }, 0, function(result) {
             test.equal(6, result, 'queue reduced properly');
             test.done();
-        }, 0);
+        });
 };
 
 exports.reduceNamedQueue = function(test) {
@@ -92,7 +92,7 @@ exports.reduceNamedQueue = function(test) {
     q([1, 2, 3])
         .reduce(function(prev, curr) {
             return prev + curr;
-        }, 'testReduceNamedQueue', 0);
+        }, 0, 'testReduceNamedQueue');
     q('testReduceNamedQueue')
         .each(function(result) {
             test.equal(6, result, 'reduce passed to named queue');
@@ -106,7 +106,7 @@ exports.reduceAnonQueue = function(test) {
     q([1, 2, 3])
         .reduce(function(prev, curr) {
             return prev + curr;
-        }, null, 0)
+        }, 0)
         .each(function(result) {
             test.equal(6, result, 'reduce passed to anon queue');
             test.done();
@@ -183,7 +183,7 @@ exports.latency = function(test) {
                 reducedLatency = true;
             }
             return val;
-        }, function() {
+        }, 0, function() {
             test.ok(reducedLatency, 'reduce started processing before map completed');
             test.done();
         });
@@ -348,10 +348,10 @@ exports.flattenAndNode = function(test) {
         .nodeAsync(fs.readFile)
         .reduce(function(concat, fileData) {
             return concat + fileData.toString('utf8');
-        }, function(result) {
+        }, '', function(result) {
             test.equal(typeof(result), 'string', 'all files concatenated properly');
             test.done();
-        }, '');
+        });
     q('error')
         .each(function() {
             test.ok(false, 'No error should have occurred');
@@ -655,10 +655,10 @@ exports.asyncMapReduce = function(test) {
         })
         .reduce(function(sum, cur, cb) {
             cb(sum + cur);
-        }, function(result) {
+        }, 0, function(result) {
             test.equal(result, 30, 'All values doubled and summed together');
             test.done();
-        }, 0);
+        });
 };
 
 exports.asyncEachMapReduce = function(test) {
@@ -671,10 +671,10 @@ exports.asyncEachMapReduce = function(test) {
         })
         .reduce(function(sum, cur, cb) {
             cb(sum + cur);
-        }, function(result) {
+        }, 0, function(result) {
             test.equal(result, 30, 'All values logged, doubled, and summed together');
             test.done();
-        }, 0);
+        });
 };
 
 exports.wait = function(test) {

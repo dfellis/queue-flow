@@ -627,7 +627,7 @@ the <code>out</code> value.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>Q.prototype.reduce = <span class="function"><span class="keyword">function</span> <span class="title">reduce</span><span class="params">(callback, last, initial)</span> {</span>
+            <div class="content"><div class='highlight'><pre>Q.prototype.reduce = <span class="function"><span class="keyword">function</span> <span class="title">reduce</span><span class="params">(callback, initial, last)</span> {</span>
     <span class="keyword">var</span> out = initial;
     <span class="keyword">var</span> outQueue;
     <span class="keyword">if</span>(!last) outQueue = <span class="keyword">new</span> Q(<span class="literal">null</span>, <span class="keyword">this</span>.options, <span class="keyword">this</span>.namespace);

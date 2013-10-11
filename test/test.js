@@ -422,6 +422,17 @@ exports.namespaces = function(test) {
     test.done();
 };
 
+exports.namespaceBranching = function(test) {
+    bootstrap(test);
+    test.expect(1);
+    var localQ = q.ns();
+    localQ(['foo']).branch('bar');
+    localQ('bar').each(function(val) {
+        test.equal('foo', val, 'branching in namespaced queues works as expected');
+        test.done();
+    });
+};
+
 exports.each = function(test) {
     bootstrap(test);
     test.expect(5);
